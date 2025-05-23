@@ -1,13 +1,13 @@
-# Azure Container Registry Terraform Makefile
+# Azure Container Registry and AKS Terraform Makefile
 # Provides common commands for managing the Terraform infrastructure
 
-.PHONY: help init plan apply destroy validate format clean setup
+.PHONY: help init plan apply destroy validate format clean setup aks-creds nginx-install
 
 # Default target
 help: ## Show this help message
-	@echo "Azure Container Registry Terraform Commands"
-	@echo "=========================================="
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
+	@echo "Azure Container Registry and AKS Terraform Commands"
+	@echo "=================================================="
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
 setup: ## Run the setup script to configure the project
 	@chmod +x scripts/setup.sh
@@ -120,3 +120,58 @@ cost: ## Estimate infrastructure costs
 	else \
 		echo "⚠️  infracost not installed. Visit: https://www.infracost.io/docs/"; \
 	fi
+
+# AKS specific commands
+aks-creds: ## Get AKS cluster credentials
+	@echo "🔐 Getting AKS credentials..."
+	@CLUSTER_NAME=$$(terraform output -raw aks_cluster_name 2>/dev/null || echo ""); \
+	RG_NAME=$$(terraform output -raw resource_group_name 2>/dev/null || echo ""); \
+	if [ -z "$$CLUSTER_NAME" ] || [ -z "$$RG_NAME" ]; then \
+		echo "❌ AKS not deployed yet. Run 'make apply' first."; \
+	else \
+		az aks get-credentials --resource-group $$RG_NAME --name $$CLUSTER_NAME --overwrite-existing; \
+		echo "✅ AKS credentials configured for kubectl"; \
+	fi
+
+aks-info: ## Show AKS cluster information
+	@echo "ℹ️  AKS Cluster Information:"
+	@terraform output | grep aks
+
+aks-nodes: ## Show AKS cluster nodes
+	@echo "🖥️  AKS Cluster Nodes:"
+	@kubectl get nodes -o wide 2>/dev/null || echo "❌ Run 'make aks-creds' first to configure kubectl"
+
+nginx-install: ## Install NGINX Ingress Controller
+	@echo "🚀 Installing NGINX Ingress Controller..."
+	@chmod +x scripts/install-nginx-ingress.sh
+	@CLUSTER_NAME=$$(terraform output -raw aks_cluster_name 2>/dev/null || echo ""); \
+	RG_NAME=$$(terraform output -raw resource_group_name 2>/dev/null || echo ""); \
+	if [ -z "$$CLUSTER_NAME" ] || [ -z "$$RG_NAME" ]; then \
+		echo "❌ AKS not deployed yet. Run 'make apply' first."; \
+	else \
+		./scripts/install-nginx-ingress.sh $$CLUSTER_NAME $$RG_NAME; \
+	fi
+
+nginx-status: ## Check NGINX Ingress Controller status
+	@echo "📊 NGINX Ingress Controller Status:"
+	@kubectl get pods -n ingress-nginx 2>/dev/null || echo "❌ NGINX Ingress not installed or kubectl not configured"
+	@echo ""
+	@kubectl get svc -n ingress-nginx 2>/dev/null || echo "❌ NGINX Ingress not installed or kubectl not configured"
+
+k8s-dashboard: ## Install Kubernetes Dashboard
+	@echo "📊 Installing Kubernetes Dashboard..."
+	@kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/recommended.yaml
+	@echo "✅ Kubernetes Dashboard installed"
+	@echo "💡 To access: kubectl proxy then visit http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/"
+
+# Complete deployment workflow
+deploy-all: apply aks-creds nginx-install ## Deploy everything (ACR + AKS + NGINX Ingress)
+	@echo "🎉 Complete deployment finished!"
+	@echo "📋 Summary:"
+	@terraform output
+
+dev-deploy-all: dev-apply aks-creds nginx-install ## Deploy everything for development
+	@echo "🎉 Development deployment finished!"
+
+prod-deploy-all: prod-apply aks-creds nginx-install ## Deploy everything for production
+	@echo "🎉 Production deployment finished!"

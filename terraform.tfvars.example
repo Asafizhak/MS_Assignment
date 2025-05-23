@@ -2,12 +2,30 @@
 # Note: terraform.tfvars is ignored by git for security
 
 # Resource Group Configuration
-resource_group_name = "rg-acr-demo-dev"
+resource_group_name = "rg-acr-aks-demo-dev"
 location           = "West Europe"
 
 # ACR Configuration
 acr_name = "acrmsassignment2025"  # Must be globally unique, 5-50 alphanumeric characters
 acr_sku  = "Basic"          # Basic is the cheapest option
+
+# AKS Configuration
+aks_cluster_name                      = "aks-demo-dev"
+aks_dns_prefix                       = "aks-demo-dev"
+aks_sku_tier                         = "Free"
+aks_node_count                       = 1
+aks_vm_size                          = "Standard_B2s"  # Cheap VM size for demo
+aks_enable_auto_scaling              = false
+aks_min_node_count                   = 1
+aks_max_node_count                   = 3
+aks_vnet_address_space               = "10.0.0.0/16"
+aks_nodes_subnet_address_prefix      = "10.0.1.0/24"
+aks_app_gateway_subnet_address_prefix = "10.0.2.0/24"
+aks_dns_service_ip                   = "10.1.0.10"
+aks_service_cidr                     = "10.1.0.0/16"
+aks_enable_application_gateway       = false
+aks_enable_nginx_ingress             = true
+aks_nginx_ingress_replica_count      = 1
 
 # Environment
 environment = "dev"
@@ -15,7 +33,7 @@ environment = "dev"
 # Tags
 common_tags = {
   Environment = "dev"
-  Project     = "acr-terraform-demo"
+  Project     = "acr-aks-terraform-demo"
   ManagedBy   = "terraform"
   Owner       = "your-team"
 }

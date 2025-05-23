@@ -1,12 +1,12 @@
-# Azure Container Registry Terraform Project Structure
+# Azure Container Registry and AKS Terraform Project Structure
 
 ## Overview
-This is a modular Terraform project for deploying Azure Container Registry (ACR) with GitHub Actions CI/CD pipeline, optimized for cost-effectiveness using the Basic SKU.
+This is a modular Terraform project for deploying Azure Container Registry (ACR) and Azure Kubernetes Service (AKS) with NGINX Ingress Controller. The project includes GitHub Actions CI/CD pipeline and is optimized for cost-effectiveness with private network configuration.
 
 ## Project Structure
 
 ```
-azure-acr-terraform/
+azure-acr-aks-terraform/
 ├── .gitignore                           # Git ignore file for Terraform
 ├── main.tf                              # Main Terraform configuration
 ├── variables.tf                         # Input variables definition
@@ -16,6 +16,7 @@ azure-acr-terraform/
 ├── Makefile                             # Common operations automation
 ├── README.md                            # Comprehensive documentation
 ├── PROJECT_STRUCTURE.md                 # This file
+├── AKS_DEPLOYMENT_GUIDE.md              # AKS deployment guide
 │
 ├── .github/
 │   └── workflows/
@@ -26,26 +27,41 @@ azure-acr-terraform/
 │   └── prod.tfvars                      # Production environment variables
 │
 ├── modules/
-│   └── acr/                            # Azure Container Registry module
-│       ├── main.tf                     # ACR resource configuration
+│   ├── acr/                            # Azure Container Registry module
+│   │   ├── main.tf                     # ACR resource configuration
+│   │   ├── variables.tf                # Module input variables
+│   │   └── outputs.tf                  # Module outputs
+│   └── aks/                            # Azure Kubernetes Service module
+│       ├── main.tf                     # AKS resource configuration
 │       ├── variables.tf                # Module input variables
 │       └── outputs.tf                  # Module outputs
 │
 └── scripts/
-    └── setup.sh                        # Interactive setup script
+    ├── setup.sh                        # Interactive setup script
+    └── install-nginx-ingress.sh        # NGINX Ingress installation script
 ```
 
 ## Key Features
 
 ### 🏗️ Modular Architecture
 - **Reusable ACR Module**: Self-contained module for Azure Container Registry
+- **Reusable AKS Module**: Self-contained module for Azure Kubernetes Service
 - **Environment Separation**: Separate variable files for dev/prod environments
-- **Scalable Design**: Easy to extend with additional Azure services (AKS, Key Vault, etc.)
+- **Scalable Design**: Modular design allows easy extension with additional services
 
 ### 💰 Cost Optimized
 - **Basic SKU**: Cheapest ACR option (~$5/month)
-- **East US Region**: Cost-effective Azure region
-- **Minimal Features**: Only essential features enabled for demo purposes
+- **Free AKS Tier**: No control plane costs for development
+- **Standard_B2s VMs**: Cost-effective node sizes for demo purposes
+- **Ephemeral OS Disks**: Reduced storage costs
+- **West Europe Region**: Cost-effective Azure region
+
+### 🔒 Security Focused
+- **Private AKS Cluster**: API server not exposed to internet
+- **Internal Load Balancer**: NGINX Ingress with internal Azure LB
+- **Network Policies**: Azure CNI with network policy enforcement
+- **RBAC Enabled**: Role-based access control with Azure AD
+- **ACR Integration**: Secure container image pulling
 
 ### 🚀 CI/CD Ready
 - **GitHub Actions**: Automated deployment pipeline
@@ -54,10 +70,10 @@ azure-acr-terraform/
 - **Validation Pipeline**: Format, validate, and plan on PRs
 
 ### 🛠️ Developer Experience
-- **Makefile**: Common commands automation
-- **Setup Script**: Interactive project configuration
+- **Makefile**: Common commands automation including AKS management
+- **Setup Scripts**: Interactive project configuration and NGINX installation
 - **Multiple Environments**: Easy switching between dev/prod
-- **Comprehensive Documentation**: Detailed README with examples
+- **Comprehensive Documentation**: Detailed guides and examples
 
 ## Resource Configuration
 
@@ -65,12 +81,25 @@ azure-acr-terraform/
 - **SKU**: Basic (cheapest option)
 - **Admin User**: Enabled for easy authentication
 - **Public Access**: Enabled (can be restricted later)
-- **Location**: East US (cost-effective)
+- **Location**: West Europe (cost-effective)
+
+### Azure Kubernetes Service
+- **SKU Tier**: Free (dev) / Standard (prod)
+- **Node Pool**: 1-2 nodes with Standard_B2s VMs
+- **Network**: Private cluster with custom VNet
+- **Ingress**: NGINX with internal load balancer
+- **Identity**: System-assigned managed identity
+
+### Virtual Network
+- **Address Space**: 10.0.0.0/16
+- **AKS Nodes Subnet**: 10.0.1.0/24
+- **App Gateway Subnet**: 10.0.2.0/24 (reserved)
+- **Service CIDR**: 10.1.0.0/16
 
 ### Resource Group
-- **Naming**: Environment-specific (rg-acr-demo-{env})
+- **Naming**: Environment-specific (rg-acr-aks-demo-{env})
 - **Tags**: Comprehensive tagging strategy
-- **Location**: Consistent with ACR location
+- **Location**: Consistent across all resources
 
 ## Security Considerations
 
@@ -152,20 +181,29 @@ Set these in your GitHub repository settings:
 
 ## Future Enhancements
 
-This project is designed to be extended with:
+This project can be extended with:
 
-- **AKS Module**: Kubernetes cluster integration
 - **Key Vault Module**: Secure secret management
-- **Virtual Network Module**: Network isolation
-- **Monitoring Module**: Azure Monitor integration
-- **Backup Module**: Container image backup strategy
+- **Azure Monitor Module**: Comprehensive monitoring and alerting
+- **Backup Module**: Container image and cluster backup strategy
+- **Application Gateway Module**: Advanced ingress with WAF
+- **Azure Policy Module**: Governance and compliance
 
 ## Cost Estimation
 
-**Monthly Costs (Basic SKU)**:
-- ACR Basic: ~$5 USD
-- Resource Group: Free
-- **Total**: ~$5 USD/month
+### Development Environment
+- **ACR Basic**: ~$5 USD/month
+- **AKS Control Plane**: Free
+- **1x Standard_B2s Node**: ~$30 USD/month
+- **Load Balancer**: ~$20 USD/month
+- **Total**: ~$55 USD/month
+
+### Production Environment
+- **ACR Basic**: ~$5 USD/month
+- **AKS Control Plane**: ~$75 USD/month
+- **2x Standard_B2s Nodes**: ~$60 USD/month
+- **Load Balancer**: ~$20 USD/month
+- **Total**: ~$160 USD/month
 
 ## Support
 
