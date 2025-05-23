@@ -1,22 +1,3 @@
-# Configure the Azure Provider
-terraform {
-  required_providers {
-    azurerm = {
-      source  = "hashicorp/azurerm"
-      version = "~>3.0"
-    }
-  }
-  
-  # Backend configuration for remote state storage
-  backend "azurerm" {
-    # These values will be provided via GitHub Actions
-    # resource_group_name  = "tfstate-rg"
-    # storage_account_name = "tfstatestorage"
-    # container_name       = "tfstate"
-    # key                  = "terraform.tfstate"
-  }
-}
-
 # Configure the Microsoft Azure Provider
 provider "azurerm" {
   features {}
@@ -39,8 +20,8 @@ module "acr" {
 
   name                = var.acr_name
   resource_group_name = azurerm_resource_group.main.name
-  location           = azurerm_resource_group.main.location
-  sku                = var.acr_sku
-  
+  location            = azurerm_resource_group.main.location
+  sku                 = var.acr_sku
+
   tags = var.common_tags
 }

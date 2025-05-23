@@ -11,14 +11,15 @@ This document explains how the Terraform state is configured to use Azure Blob S
 - **State File**: `acr-demo.terraform.tfstate`
 - **Location**: West Europe
 
-### Backend Configuration File
-The backend configuration is stored in [`backend-config.hcl`](backend-config.hcl:1):
+### Backend Configuration
+The backend configuration uses individual command-line parameters:
 
-```hcl
-resource_group_name  = "Storage_SG"
-storage_account_name = "msassignmenttfstate"
-container_name       = "tfstate"
-key                  = "acr-demo.terraform.tfstate"
+```bash
+terraform init \
+  -backend-config="resource_group_name=Storage_SG" \
+  -backend-config="storage_account_name=msassignmenttfstate" \
+  -backend-config="container_name=tfstate" \
+  -backend-config="key=acr-demo.terraform.tfstate"
 ```
 
 ## How It Works
@@ -27,7 +28,12 @@ key                  = "acr-demo.terraform.tfstate"
 The GitHub Actions workflow automatically uses the remote state:
 ```yaml
 - name: Terraform Init
-  run: terraform init -backend-config=backend-config.hcl
+  run: |
+    terraform init \
+      -backend-config="resource_group_name=Storage_SG" \
+      -backend-config="storage_account_name=msassignmenttfstate" \
+      -backend-config="container_name=tfstate" \
+      -backend-config="key=acr-demo.terraform.tfstate"
 ```
 
 ### Local Development
@@ -37,7 +43,11 @@ For local development, use the Makefile or direct commands:
 make init
 
 # Direct Terraform command
-terraform init -backend-config=backend-config.hcl
+terraform init \
+  -backend-config="resource_group_name=Storage_SG" \
+  -backend-config="storage_account_name=msassignmenttfstate" \
+  -backend-config="container_name=tfstate" \
+  -backend-config="key=acr-demo.terraform.tfstate"
 ```
 
 ## Benefits of Remote State

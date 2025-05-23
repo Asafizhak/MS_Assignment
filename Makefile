@@ -15,7 +15,11 @@ setup: ## Run the setup script to configure the project
 
 init: ## Initialize Terraform
 	@echo "🏗️  Initializing Terraform..."
-	@terraform init -backend-config=backend-config.hcl
+	@terraform init \
+		-backend-config="resource_group_name=Storage_SG" \
+		-backend-config="storage_account_name=msassignmenttfstate" \
+		-backend-config="container_name=tfstate" \
+		-backend-config="key=acr-demo.terraform.tfstate"
 
 validate: ## Validate Terraform configuration
 	@echo "✅ Validating Terraform configuration..."

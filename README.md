@@ -93,7 +93,11 @@ For local testing and development:
 
 ```bash
 # Initialize Terraform with remote state
-terraform init -backend-config=backend-config.hcl
+terraform init \
+  -backend-config="resource_group_name=Storage_SG" \
+  -backend-config="storage_account_name=msassignmenttfstate" \
+  -backend-config="container_name=tfstate" \
+  -backend-config="key=acr-demo.terraform.tfstate"
 
 # Validate configuration
 terraform validate
