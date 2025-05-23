@@ -1,0 +1,21 @@
+# Copy this file to terraform.tfvars and update the values
+# Note: terraform.tfvars is ignored by git for security
+
+# Resource Group Configuration
+resource_group_name = "rg-acr-demo-dev"
+location           = "West Europe"
+
+# ACR Configuration
+acr_name = "acrdemodev123"  # Must be globally unique, 5-50 alphanumeric characters
+acr_sku  = "Basic"          # Basic is the cheapest option
+
+# Environment
+environment = "dev"
+
+# Tags
+common_tags = {
+  Environment = "dev"
+  Project     = "acr-terraform-demo"
+  ManagedBy   = "terraform"
+  Owner       = "your-team"
+}
