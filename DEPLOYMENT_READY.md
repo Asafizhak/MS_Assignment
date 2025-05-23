@@ -24,8 +24,7 @@ Your modular Terraform project for Azure Container Registry is now fully configu
 Plan: 2 to add, 0 to change, 0 to destroy
 
 Resources to be created:
-- azurerm_resource_group.main (rg-acr-demo)
-- azurerm_container_registry.acr (acrdemo)
+- azurerm_container_registry.acr (acrmsassignment2025)
 ```
 
 ### 4. **Cost Optimization**
@@ -61,7 +60,7 @@ terraform apply  # Deploy the infrastructure
 - [x] Terraform configuration validated
 - [x] Remote state backend working
 - [x] Azure authentication configured
-- [x] ACR name globally unique (`acrdemo`)
+- [x] ACR name globally unique (`acrmsassignment2025`)
 - [x] Location set to West Europe
 - [x] Basic SKU for cost optimization
 - [x] GitHub Actions workflow ready
@@ -115,7 +114,7 @@ acr_admin_password      = (sensitive value)
 acr_admin_username      = (sensitive value)
 acr_id                  = (known after apply)
 acr_login_server        = (known after apply)
-acr_name                = "acrdemo"
+acr_name                = "acrmsassignment2025"
 resource_group_location = "westeurope"
 resource_group_name     = "rg-acr-demo"
 ```
@@ -129,19 +128,19 @@ terraform output acr_admin_username
 terraform output acr_admin_password
 
 # Login to ACR
-az acr login --name acrdemo
+az acr login --name acrmsassignment2025
 
 # Or with Docker
-docker login acrdemo.azurecr.io
+docker login acrmsassignment2025.azurecr.io
 ```
 
 ### Push Container Image
 ```bash
 # Tag your image
-docker tag myapp:latest acrdemo.azurecr.io/myapp:latest
+docker tag myapp:latest acrmsassignment2025.azurecr.io/myapp:latest
 
 # Push to ACR
-docker push acrdemo.azurecr.io/myapp:latest
+docker push acrmsassignment2025.azurecr.io/myapp:latest
 ```
 
 ## 🛡️ Security Notes
