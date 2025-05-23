@@ -44,7 +44,29 @@ Azure AD Integration (legacy) is deprecated
 **Solution:**
 This is just a warning and doesn't affect functionality. The configuration uses the current recommended approach for Azure AD integration with AKS.
 
-### 3. AKS Cluster Creation Timeout
+### 3. Terraform Count Argument Error
+
+**Error:**
+```
+Error: Invalid count argument
+
+The "count" value depends on resource attributes that cannot be determined
+until apply, so Terraform cannot predict how many instances will be
+created. To work around this, use the -target argument to first apply only
+the resources that the count depends on.
+```
+
+**Solution:**
+This error occurs when using `count` with values that depend on resource outputs. The issue has been resolved by replacing `count` with `for_each` in the role assignment resource. If you encounter this error:
+
+1. **Update to latest code** - The fix is already implemented
+2. **Alternative workaround** - Use targeted apply:
+```bash
+terraform apply -target=module.acr
+terraform apply
+```
+
+### 4. AKS Cluster Creation Timeout
 
 **Error:**
 ```
