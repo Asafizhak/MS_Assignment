@@ -89,7 +89,7 @@ resource "azurerm_subnet" "aks_nodes" {
 # Role assignment for AKS to pull from ACR
 # Note: This requires the service principal to have User Access Administrator role
 # If deployment fails due to authorization, you can create this role assignment manually:
-# az role assignment create --assignee <AKS_KUBELET_IDENTITY_OBJECT_ID> --role AcrPull --scope <ACR_RESOURCE_ID>
+# az role assignment create --assignee <AKS_KUBELET_IDENTITY_OBJECT_ID> --role AcrPull --scope <ACR_RESOURCE_ID> 
 resource "azurerm_role_assignment" "aks_acr_pull" {
   count                = var.enable_acr_role_assignment && var.acr_id != null ? 1 : 0
   scope                = var.acr_id
