@@ -44,20 +44,30 @@ Azure AD Integration (legacy) is deprecated
 **Solution:**
 This is just a warning and doesn't affect functionality. The configuration uses the current recommended approach for Azure AD integration with AKS.
 
-### 3. Terraform Count Argument Error
+### 3. Terraform Count/For_Each Argument Error
 
 **Error:**
 ```
-Error: Invalid count argument
+Error: Invalid count argument / Invalid for_each argument
 
-The "count" value depends on resource attributes that cannot be determined
+The "count"/"for_each" value depends on resource attributes that cannot be determined
 until apply, so Terraform cannot predict how many instances will be
-created. To work around this, use the -target argument to first apply only
-the resources that the count depends on.
+created.
 ```
 
 **Solution:**
-This error occurs when using `count` with values that depend on resource outputs. The issue has been resolved by replacing `count` with `for_each` in the role assignment resource. If you encounter this error:
+This error occurs when using `count` or `for_each` with values that depend on resource outputs. The issue has been resolved by using a map-based `for_each` with static keys in the role assignment resource:
+
+```hcl
+# Fixed implementation:
+resource "azurerm_role_assignment" "aks_acr_pull" {
+  for_each = var.enable_acr_role_assignment ? { "acr_pull" = var.acr_id } : {}
+  
+  scope                = each.value
+  role_definition_name = "AcrPull"
+  principal_id         = azurerm_kubernetes_cluster.main.kubelet_identity[0].object_id
+}
+```
 
 1. **Update to latest code** - The fix is already implemented
 2. **Alternative workaround** - Use targeted apply:

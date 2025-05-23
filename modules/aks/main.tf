@@ -91,9 +91,9 @@ resource "azurerm_subnet" "aks_nodes" {
 # If deployment fails due to authorization, you can create this role assignment manually:
 # az role assignment create --assignee <AKS_KUBELET_IDENTITY_OBJECT_ID> --role AcrPull --scope <ACR_RESOURCE_ID>
 resource "azurerm_role_assignment" "aks_acr_pull" {
-  for_each = var.enable_acr_role_assignment && var.acr_id != null && var.acr_id != "" ? toset(["acr_pull"]) : toset([])
+  for_each = var.enable_acr_role_assignment ? { "acr_pull" = var.acr_id } : {}
   
-  scope                = var.acr_id
+  scope                = each.value
   role_definition_name = "AcrPull"
   principal_id         = azurerm_kubernetes_cluster.main.kubelet_identity[0].object_id
 }
