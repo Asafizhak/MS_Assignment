@@ -13,6 +13,10 @@ setup: ## Run the setup script to configure the project
 	@chmod +x scripts/setup.sh
 	@./scripts/setup.sh
 
+quick-manage: ## Interactive infrastructure management (deploy/destroy for cost savings)
+	@chmod +x scripts/quick-manage.sh
+	@./scripts/quick-manage.sh
+
 init: ## Initialize Terraform
 	@echo "🏗️  Initializing Terraform..."
 	@terraform init \
@@ -43,11 +47,40 @@ apply-auto: ## Apply Terraform configuration without confirmation
 
 destroy: ## Destroy Terraform-managed infrastructure
 	@echo "💥 Destroying Terraform infrastructure..."
+	@echo "⚠️  This will delete ALL resources including:"
+	@echo "   - AKS Cluster and all workloads"
+	@echo "   - ACR and all container images"
+	@echo "   - Virtual Network and subnets"
+	@echo "   - Load Balancers and Public IPs"
 	@terraform destroy
 
 destroy-auto: ## Destroy infrastructure without confirmation
 	@echo "💥 Destroying Terraform infrastructure (auto-approve)..."
 	@terraform destroy -auto-approve
+
+dev-destroy: ## Destroy development environment
+	@echo "💥 Destroying development environment..."
+	@terraform destroy -var-file="environments/dev.tfvars"
+
+prod-destroy: ## Destroy production environment
+	@echo "💥 Destroying production environment..."
+	@terraform destroy -var-file="environments/prod.tfvars"
+
+cost-estimate: ## Show current monthly cost estimate
+	@echo "💰 Current Monthly Cost Estimate:"
+	@echo "Development Environment (~55 USD/month):"
+	@echo "  - ACR Basic: ~5 USD"
+	@echo "  - AKS Control Plane: Free"
+	@echo "  - 1x Standard_B2s Node: ~30 USD"
+	@echo "  - Load Balancer: ~20 USD"
+	@echo ""
+	@echo "Production Environment (~160 USD/month):"
+	@echo "  - ACR Basic: ~5 USD"
+	@echo "  - AKS Control Plane: ~75 USD"
+	@echo "  - 2x Standard_B2s Nodes: ~60 USD"
+	@echo "  - Load Balancer: ~20 USD"
+	@echo ""
+	@echo "💡 To save costs, run 'make destroy' when not in use"
 
 output: ## Show Terraform outputs
 	@echo "📤 Terraform outputs:"
