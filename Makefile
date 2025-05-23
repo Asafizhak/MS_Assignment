@@ -14,8 +14,12 @@ setup: ## Run the setup script to configure the project
 	@./scripts/setup.sh
 
 quick-manage: ## Interactive infrastructure management (deploy/destroy for cost savings)
-	@chmod +x scripts/quick-manage.sh
-	@./scripts/quick-manage.sh
+	@echo "🚀 Starting interactive infrastructure manager..."
+	@if exist scripts\quick-manage.bat ( \
+		scripts\quick-manage.bat \
+	) else ( \
+		chmod +x scripts/quick-manage.sh && ./scripts/quick-manage.sh \
+	)
 
 init: ## Initialize Terraform
 	@echo "🏗️  Initializing Terraform..."
