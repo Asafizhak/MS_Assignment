@@ -94,6 +94,11 @@ acr-info: ## Show ACR information
 	@echo "ℹ️  ACR Information:"
 	@terraform output
 
+acr-integration: ## Setup ACR integration with AKS (manual role assignment)
+	@echo "🔗 Setting up ACR integration with AKS..."
+	@chmod +x scripts/setup-acr-integration.sh
+	@./scripts/setup-acr-integration.sh
+
 # Security
 security-scan: ## Run security scan on Terraform files
 	@echo "🔍 Running security scan..."

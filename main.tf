@@ -52,8 +52,9 @@ module "aks" {
   enable_nginx_ingress        = var.aks_enable_nginx_ingress
   nginx_ingress_replica_count = var.aks_nginx_ingress_replica_count
 
-  acr_id = module.acr.id
-  tags   = var.common_tags
+  acr_id                     = module.acr.id
+  enable_acr_role_assignment = var.aks_enable_acr_role_assignment
+  tags                       = var.common_tags
 
   depends_on = [module.acr]
 }

@@ -109,6 +109,12 @@ variable "acr_id" {
   default     = null
 }
 
+variable "enable_acr_role_assignment" {
+  description = "Enable automatic ACR role assignment (requires User Access Administrator permissions)"
+  type        = bool
+  default     = false
+}
+
 variable "tags" {
   description = "Tags to apply to all resources"
   type        = map(string)

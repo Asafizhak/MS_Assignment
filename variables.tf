@@ -139,3 +139,9 @@ variable "aks_nginx_ingress_replica_count" {
   type        = number
   default     = 1
 }
+
+variable "aks_enable_acr_role_assignment" {
+  description = "Enable automatic ACR role assignment (requires User Access Administrator permissions)"
+  type        = bool
+  default     = false
+}
