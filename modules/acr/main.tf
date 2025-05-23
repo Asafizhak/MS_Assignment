@@ -4,13 +4,13 @@ resource "azurerm_container_registry" "acr" {
   resource_group_name = var.resource_group_name
   location            = var.location
   sku                 = var.sku
-  
+
   # Enable admin user for basic authentication (useful for demos)
   admin_enabled = true
-  
+
   # Public network access (can be restricted in production)
   public_network_access_enabled = true
-  
+
   # Network rule set for Basic SKU (limited options)
   dynamic "network_rule_set" {
     for_each = var.sku == "Premium" ? [1] : []
@@ -18,7 +18,7 @@ resource "azurerm_container_registry" "acr" {
       default_action = "Allow"
     }
   }
-  
+
   tags = var.tags
 }
 

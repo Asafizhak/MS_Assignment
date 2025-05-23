@@ -8,7 +8,7 @@ resource "azurerm_kubernetes_cluster" "main" {
 
   # Private cluster configuration
   private_cluster_enabled             = true
-  private_dns_zone_id                = "System"
+  private_dns_zone_id                 = "System"
   private_cluster_public_fqdn_enabled = false
 
   # Default node pool
@@ -18,13 +18,13 @@ resource "azurerm_kubernetes_cluster" "main" {
     vm_size             = var.vm_size
     type                = "VirtualMachineScaleSets"
     enable_auto_scaling = var.enable_auto_scaling
-    min_count          = var.enable_auto_scaling ? var.min_node_count : null
-    max_count          = var.enable_auto_scaling ? var.max_node_count : null
-    
+    min_count           = var.enable_auto_scaling ? var.min_node_count : null
+    max_count           = var.enable_auto_scaling ? var.max_node_count : null
+
     # Use ephemeral OS disk for cost savings
-    os_disk_type = "Ephemeral"
+    os_disk_type    = "Ephemeral"
     os_disk_size_gb = 30
-    
+
     vnet_subnet_id = azurerm_subnet.aks_nodes.id
   }
 
@@ -50,11 +50,6 @@ resource "azurerm_kubernetes_cluster" "main" {
     azure_rbac_enabled = true
   }
 
-  # Add-ons
-  ingress_application_gateway {
-    gateway_id = var.application_gateway_id
-  }
-
   tags = var.tags
 }
 
@@ -76,90 +71,6 @@ resource "azurerm_subnet" "aks_nodes" {
   address_prefixes     = [var.nodes_subnet_address_prefix]
 }
 
-# Subnet for Application Gateway (if using AGIC)
-resource "azurerm_subnet" "app_gateway" {
-  count                = var.enable_application_gateway ? 1 : 0
-  name                 = "${var.cluster_name}-appgw-subnet"
-  resource_group_name  = var.resource_group_name
-  virtual_network_name = azurerm_virtual_network.aks.name
-  address_prefixes     = [var.app_gateway_subnet_address_prefix]
-}
-
-# Public IP for Application Gateway
-resource "azurerm_public_ip" "app_gateway" {
-  count               = var.enable_application_gateway ? 1 : 0
-  name                = "${var.cluster_name}-appgw-pip"
-  resource_group_name = var.resource_group_name
-  location            = var.location
-  allocation_method   = "Static"
-  sku                 = "Standard"
-
-  tags = var.tags
-}
-
-# Application Gateway for Ingress
-resource "azurerm_application_gateway" "main" {
-  count               = var.enable_application_gateway ? 1 : 0
-  name                = "${var.cluster_name}-appgw"
-  resource_group_name = var.resource_group_name
-  location            = var.location
-
-  sku {
-    name     = "Standard_v2"
-    tier     = "Standard_v2"
-    capacity = 1
-  }
-
-  gateway_ip_configuration {
-    name      = "appGatewayIpConfig"
-    subnet_id = azurerm_subnet.app_gateway[0].id
-  }
-
-  frontend_port {
-    name = "port_80"
-    port = 80
-  }
-
-  frontend_port {
-    name = "port_443"
-    port = 443
-  }
-
-  frontend_ip_configuration {
-    name                 = "appGwPublicFrontendIp"
-    public_ip_address_id = azurerm_public_ip.app_gateway[0].id
-  }
-
-  backend_address_pool {
-    name = "defaultaddresspool"
-  }
-
-  backend_http_settings {
-    name                  = "defaulthttpsetting"
-    cookie_based_affinity = "Disabled"
-    port                  = 80
-    protocol              = "Http"
-    request_timeout       = 60
-  }
-
-  http_listener {
-    name                           = "defaulthttplistener"
-    frontend_ip_configuration_name = "appGwPublicFrontendIp"
-    frontend_port_name             = "port_80"
-    protocol                       = "Http"
-  }
-
-  request_routing_rule {
-    name                       = "defaultrule"
-    rule_type                  = "Basic"
-    http_listener_name         = "defaulthttplistener"
-    backend_address_pool_name  = "defaultaddresspool"
-    backend_http_settings_name = "defaulthttpsetting"
-    priority                   = 1
-  }
-
-  tags = var.tags
-}
 
 # Note: NGINX Ingress Controller will be installed via kubectl/helm after cluster creation
 # This is to avoid circular dependencies with the Helm provider

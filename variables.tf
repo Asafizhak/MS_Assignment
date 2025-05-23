@@ -114,11 +114,6 @@ variable "aks_nodes_subnet_address_prefix" {
   default     = "10.0.1.0/24"
 }
 
-variable "aks_app_gateway_subnet_address_prefix" {
-  description = "Address prefix for the application gateway subnet"
-  type        = string
-  default     = "10.0.2.0/24"
-}
 
 variable "aks_dns_service_ip" {
   description = "IP address within the Kubernetes service address range for cluster service discovery"
@@ -132,11 +127,6 @@ variable "aks_service_cidr" {
   default     = "10.1.0.0/16"
 }
 
-variable "aks_enable_application_gateway" {
-  description = "Enable Application Gateway Ingress Controller for AKS"
-  type        = bool
-  default     = false
-}
 
 variable "aks_enable_nginx_ingress" {
   description = "Enable NGINX Ingress Controller for AKS"

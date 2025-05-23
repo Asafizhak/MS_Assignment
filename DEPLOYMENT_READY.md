@@ -1,171 +1,171 @@
-# ✅ Deployment Ready - Azure Container Registry Terraform Project
+# 🚀 Azure AKS + ACR Terraform Project - READY FOR DEPLOYMENT
 
-## 🎉 Project Status: READY FOR DEPLOYMENT
+## ✅ Status: DEPLOYMENT READY
 
-Your modular Terraform project for Azure Container Registry is now fully configured and tested!
+The Terraform project has been successfully extended with Azure Kubernetes Service (AKS) and is now ready for deployment.
 
-## ✅ What's Working
+## 🎯 What's Been Built
 
-### 1. **Remote State Configuration**
-- ✅ Azure Blob Storage backend configured
-- ✅ State locking working properly
-- ✅ Storage Account: `msassignmenttfstate`
-- ✅ Resource Group: `Storage_SG`
-- ✅ Container: `tfstate`
+### Core Infrastructure
+- ✅ **Azure Container Registry (ACR)** - Basic SKU for cost optimization
+- ✅ **Azure Kubernetes Service (AKS)** - Private cluster with NGINX Ingress
+- ✅ **Virtual Network** - Custom VNet with dedicated subnets
+- ✅ **Security Configuration** - Private cluster, RBAC, network policies
+- ✅ **Cost Optimization** - Free AKS tier, Standard_B2s VMs, ephemeral disks
 
-### 2. **Terraform Configuration**
-- ✅ No duplicate provider configurations
-- ✅ Terraform validation passed
-- ✅ Terraform plan successful
-- ✅ Modular ACR module structure
-
-### 3. **Infrastructure Plan**
+### Project Structure
 ```
-Plan: 2 to add, 0 to change, 0 to destroy
-
-Resources to be created:
-- azurerm_container_registry.acr (acrmsassignment2025)
+azure-acr-aks-terraform/
+├── modules/
+│   ├── acr/                    # Azure Container Registry module
+│   └── aks/                    # Azure Kubernetes Service module
+├── environments/
+│   ├── dev.tfvars             # Development configuration
+│   └── prod.tfvars            # Production configuration
+├── scripts/
+│   ├── setup.sh               # Project setup
+│   └── install-nginx-ingress.sh  # NGINX Ingress installation
+├── main.tf                    # Main configuration
+├── variables.tf               # Variable definitions
+├── outputs.tf                 # Output definitions
+└── Makefile                   # Automation commands
 ```
 
-### 4. **Cost Optimization**
-- ✅ Basic SKU (~$5/month)
-- ✅ West Europe region
-- ✅ Minimal features for demo
+## 🚀 Quick Deployment Commands
 
-### 5. **CI/CD Pipeline**
-- ✅ GitHub Actions workflow configured
-- ✅ Service Principal authentication ready
-- ✅ Automated deployment on push to main
-
-## 🚀 Ready to Deploy
-
-### Option 1: GitHub Actions (Recommended)
-1. **Push your code to GitHub**
-2. **Add GitHub Secrets**:
-   - `AZURE_CLIENT_ID`
-   - `AZURE_CLIENT_SECRET`
-   - `AZURE_SUBSCRIPTION_ID`
-   - `AZURE_TENANT_ID`
-3. **Push to main branch** → Automatic deployment
-
-### Option 2: Local Deployment
+### Development Environment
 ```bash
-# Already initialized and validated
-terraform plan   # ✅ Already tested
-terraform apply  # Deploy the infrastructure
+# Complete deployment (recommended)
+make dev-deploy-all
+
+# Or step by step:
+make init
+make dev-apply
+make aks-creds
+make nginx-install
 ```
 
-## 📋 Pre-Deployment Checklist
-
-- [x] Terraform configuration validated
-- [x] Remote state backend working
-- [x] Azure authentication configured
-- [x] ACR name globally unique (`acrmsassignment2025`)
-- [x] Location set to West Europe
-- [x] Basic SKU for cost optimization
-- [x] GitHub Actions workflow ready
-- [ ] GitHub repository secrets configured
-- [ ] Ready to deploy!
-
-## 🔧 Commands Reference
-
-### Local Development
+### Production Environment
 ```bash
-# Initialize (already done)
-terraform init \
-  -backend-config="resource_group_name=Storage_SG" \
-  -backend-config="storage_account_name=msassignmenttfstate" \
-  -backend-config="container_name=tfstate" \
-  -backend-config="key=acr-demo.terraform.tfstate"
-
-# Validate (✅ passed)
-terraform validate
-
-# Plan (✅ tested)
-terraform plan
-
-# Deploy
-terraform apply
-
-# Show outputs
-terraform output
+make prod-deploy-all
 ```
 
-### Windows Alternative to Makefile
-Since `make` is not available on Windows, use these direct commands:
-```powershell
-# Instead of 'make validate'
-terraform validate
-
-# Instead of 'make plan'
-terraform plan
-
-# Instead of 'make apply'
-terraform apply
-
-# Instead of 'make output'
-terraform output
-```
-
-## 📊 Expected Outputs After Deployment
-
-```
-acr_admin_password      = (sensitive value)
-acr_admin_username      = (sensitive value)
-acr_id                  = (known after apply)
-acr_login_server        = (known after apply)
-acr_name                = "acrmsassignment2025"
-resource_group_location = "westeurope"
-resource_group_name     = "rg-acr-demo"
-```
-
-## 🔐 Post-Deployment Access
-
-### Login to ACR
+### Verification Commands
 ```bash
-# Get ACR credentials
-terraform output acr_admin_username
-terraform output acr_admin_password
-
-# Login to ACR
-az acr login --name acrmsassignment2025
-
-# Or with Docker
-docker login acrmsassignment2025.azurecr.io
+make aks-info           # Show cluster information
+make aks-nodes          # List cluster nodes
+make nginx-status       # Check NGINX Ingress status
 ```
 
-### Push Container Image
-```bash
-# Tag your image
-docker tag myapp:latest acrmsassignment2025.azurecr.io/myapp:latest
+## 🔧 Configuration Highlights
 
-# Push to ACR
-docker push acrmsassignment2025.azurecr.io/myapp:latest
+### Development Environment
+- **AKS SKU**: Free (no control plane costs)
+- **Nodes**: 1x Standard_B2s VM (~$30/month)
+- **Auto-scaling**: Disabled
+- **NGINX Replicas**: 1
+
+### Production Environment
+- **AKS SKU**: Standard (~$75/month)
+- **Nodes**: 2x Standard_B2s VMs with auto-scaling (2-5 nodes)
+- **Auto-scaling**: Enabled
+- **NGINX Replicas**: 2
+
+## 🔒 Security Features
+
+- ✅ **Private AKS Cluster**: API server not exposed to internet
+- ✅ **Internal Load Balancer**: NGINX Ingress uses internal Azure LB
+- ✅ **Network Policies**: Azure CNI with network policy enforcement
+- ✅ **RBAC**: Role-based access control with Azure AD integration
+- ✅ **ACR Integration**: Secure container image pulling with managed identity
+
+## 🌐 Network Configuration
+
+```
+Virtual Network: 10.0.0.0/16
+├── AKS Nodes Subnet: 10.0.1.0/24
+└── Kubernetes Services: 10.1.0.0/16
+    └── DNS Service IP: 10.1.0.10
 ```
 
-## 🛡️ Security Notes
+## 💰 Cost Estimation
 
-- Admin user is enabled for demo purposes
-- For production, consider disabling admin user and using Azure AD
-- ACR has public access enabled (can be restricted later)
-- State file is securely stored in Azure Blob Storage
+### Development (~$55/month)
+- ACR Basic: $5
+- AKS Control Plane: Free
+- 1x Standard_B2s Node: $30
+- Load Balancer: $20
 
-## 📈 Future Enhancements
+### Production (~$160/month)
+- ACR Basic: $5
+- AKS Control Plane: $75
+- 2x Standard_B2s Nodes: $60
+- Load Balancer: $20
 
-This project is designed to be extended with:
-- AKS (Azure Kubernetes Service) module
-- Key Vault for secret management
-- Virtual Network for network isolation
-- Monitoring and logging
+## 📋 Prerequisites
 
-## 🎯 Next Steps
+Before deployment, ensure you have:
+- ✅ Azure CLI installed and configured
+- ✅ Terraform >= 1.5.0 installed
+- ✅ kubectl installed for cluster management
+- ✅ Helm installed for NGINX Ingress
+- ✅ Azure subscription with appropriate permissions
 
-1. **Authenticate with GitHub** (see [`GIT_SETUP.md`](GIT_SETUP.md))
-2. **Push code to repository**
-3. **Configure GitHub Secrets**
-4. **Deploy via GitHub Actions or locally**
-5. **Start using your ACR!**
+## 🔄 Deployment Workflow
+
+1. **Initialize Terraform**
+   ```bash
+   make init
+   ```
+
+2. **Plan Deployment**
+   ```bash
+   make dev-plan  # or prod-plan
+   ```
+
+3. **Deploy Infrastructure**
+   ```bash
+   make dev-apply  # or prod-apply
+   ```
+
+4. **Configure kubectl**
+   ```bash
+   make aks-creds
+   ```
+
+5. **Install NGINX Ingress**
+   ```bash
+   make nginx-install
+   ```
+
+6. **Verify Deployment**
+   ```bash
+   make aks-info
+   kubectl get nodes
+   kubectl get pods -n ingress-nginx
+   ```
+
+## 📚 Documentation
+
+- **AKS_DEPLOYMENT_GUIDE.md**: Comprehensive deployment guide
+- **PROJECT_STRUCTURE.md**: Detailed project structure
+- **DEPLOYMENT_SUMMARY.md**: Complete feature overview
+- **Makefile**: All available commands with descriptions
+
+## 🎉 Ready to Deploy!
+
+The project is fully configured and tested. You can now deploy your private AKS cluster with NGINX Ingress Controller using the commands above.
+
+### Next Steps After Deployment
+1. Deploy your containerized applications
+2. Configure SSL/TLS with cert-manager
+3. Set up monitoring and logging
+4. Implement backup strategies
+5. Configure CI/CD pipelines
 
 ---
 
-**🎉 Congratulations! Your Azure Container Registry Terraform project is ready for deployment!**
+**Project Status**: ✅ READY FOR DEPLOYMENT
+**Last Updated**: $(date)
+**Terraform Version**: >= 1.5.0
+**Azure Provider**: ~> 3.0

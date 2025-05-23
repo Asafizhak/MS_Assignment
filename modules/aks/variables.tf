@@ -71,11 +71,6 @@ variable "nodes_subnet_address_prefix" {
   default     = "10.0.1.0/24"
 }
 
-variable "app_gateway_subnet_address_prefix" {
-  description = "Address prefix for the application gateway subnet"
-  type        = string
-  default     = "10.0.2.0/24"
-}
 
 variable "dns_service_ip" {
   description = "IP address within the Kubernetes service address range that will be used by cluster service discovery"
@@ -89,17 +84,6 @@ variable "service_cidr" {
   default     = "10.1.0.0/16"
 }
 
-variable "enable_application_gateway" {
-  description = "Enable Application Gateway Ingress Controller"
-  type        = bool
-  default     = false
-}
-
-variable "application_gateway_id" {
-  description = "ID of the Application Gateway for AGIC"
-  type        = string
-  default     = null
-}
 
 variable "enable_nginx_ingress" {
   description = "Enable NGINX Ingress Controller"

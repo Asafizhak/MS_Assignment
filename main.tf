@@ -43,14 +43,12 @@ module "aks" {
   min_node_count      = var.aks_min_node_count
   max_node_count      = var.aks_max_node_count
 
-  vnet_address_space                = var.aks_vnet_address_space
-  nodes_subnet_address_prefix       = var.aks_nodes_subnet_address_prefix
-  app_gateway_subnet_address_prefix = var.aks_app_gateway_subnet_address_prefix
+  vnet_address_space          = var.aks_vnet_address_space
+  nodes_subnet_address_prefix = var.aks_nodes_subnet_address_prefix
 
   dns_service_ip = var.aks_dns_service_ip
   service_cidr   = var.aks_service_cidr
 
-  enable_application_gateway  = var.aks_enable_application_gateway
   enable_nginx_ingress        = var.aks_enable_nginx_ingress
   nginx_ingress_replica_count = var.aks_nginx_ingress_replica_count
 

@@ -53,18 +53,3 @@ output "nodes_subnet_id" {
   description = "The ID of the nodes subnet"
   value       = azurerm_subnet.aks_nodes.id
 }
-
-output "app_gateway_subnet_id" {
-  description = "The ID of the application gateway subnet"
-  value       = var.enable_application_gateway ? azurerm_subnet.app_gateway[0].id : null
-}
-
-output "app_gateway_id" {
-  description = "The ID of the application gateway"
-  value       = var.enable_application_gateway ? azurerm_application_gateway.main[0].id : null
-}
-
-output "app_gateway_public_ip" {
-  description = "The public IP address of the application gateway"
-  value       = var.enable_application_gateway ? azurerm_public_ip.app_gateway[0].ip_address : null
-}

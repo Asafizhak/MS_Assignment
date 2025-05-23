@@ -1,12 +1,12 @@
 variable "name" {
   description = "Name of the Azure Container Registry"
   type        = string
-  
+
   validation {
     condition     = can(regex("^[a-zA-Z0-9]+$", var.name))
     error_message = "ACR name must contain only alphanumeric characters."
   }
-  
+
   validation {
     condition     = length(var.name) >= 5 && length(var.name) <= 50
     error_message = "ACR name must be between 5 and 50 characters."
@@ -27,7 +27,7 @@ variable "sku" {
   description = "SKU for the Azure Container Registry"
   type        = string
   default     = "Basic"
-  
+
   validation {
     condition     = contains(["Basic", "Standard", "Premium"], var.sku)
     error_message = "ACR SKU must be Basic, Standard, or Premium."
