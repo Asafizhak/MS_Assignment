@@ -14,7 +14,7 @@ variable "acr_name" {
   description = "Name of the Azure Container Registry"
   type        = string
   default     = "acrmsassignment2025"
-  
+
   validation {
     condition     = can(regex("^[a-zA-Z0-9]+$", var.acr_name))
     error_message = "ACR name must contain only alphanumeric characters."
