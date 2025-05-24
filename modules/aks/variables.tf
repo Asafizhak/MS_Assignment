@@ -121,9 +121,11 @@ variable "authorized_ip_ranges" {
   default     = null
 
   validation {
-    condition = var.authorized_ip_ranges == null || alltrue([
-      for ip in var.authorized_ip_ranges : can(cidrhost(ip, 0))
-    ])
+    condition = var.authorized_ip_ranges == null || (
+      length(var.authorized_ip_ranges) == 0 || alltrue([
+        for ip in var.authorized_ip_ranges : can(cidrhost(ip, 0))
+      ])
+    )
     error_message = "All IP ranges must be valid CIDR blocks (e.g., '203.0.113.0/24' or '203.0.113.5/32')."
   }
 }
