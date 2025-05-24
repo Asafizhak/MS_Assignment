@@ -150,7 +150,7 @@ variable "aks_authorized_ip_ranges" {
   description = "List of authorized IP ranges that can access the AKS API server (leave null for unrestricted access)"
   type        = list(string)
   default     = null
-  
+
   validation {
     condition = var.aks_authorized_ip_ranges == null || alltrue([
       for ip in var.aks_authorized_ip_ranges : can(cidrhost(ip, 0))

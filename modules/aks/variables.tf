@@ -119,7 +119,7 @@ variable "authorized_ip_ranges" {
   description = "List of authorized IP ranges that can access the Kubernetes API server"
   type        = list(string)
   default     = null
-  
+
   validation {
     condition = var.authorized_ip_ranges == null || alltrue([
       for ip in var.authorized_ip_ranges : can(cidrhost(ip, 0))
