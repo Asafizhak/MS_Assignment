@@ -115,6 +115,19 @@ variable "enable_acr_role_assignment" {
   default     = false
 }
 
+variable "authorized_ip_ranges" {
+  description = "List of authorized IP ranges that can access the Kubernetes API server"
+  type        = list(string)
+  default     = null
+  
+  validation {
+    condition = var.authorized_ip_ranges == null || alltrue([
+      for ip in var.authorized_ip_ranges : can(cidrhost(ip, 0))
+    ])
+    error_message = "All IP ranges must be valid CIDR blocks (e.g., '203.0.113.0/24' or '203.0.113.5/32')."
+  }
+}
+
 variable "tags" {
   description = "Tags to apply to all resources"
   type        = map(string)

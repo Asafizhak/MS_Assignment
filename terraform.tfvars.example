@@ -26,6 +26,13 @@ aks_enable_nginx_ingress             = true
 aks_nginx_ingress_replica_count      = 1
 aks_enable_acr_role_assignment       = false  # Set to true if service principal has User Access Administrator role
 
+# Authorized IP ranges for AKS API server access (for public clusters)
+# Leave commented for unrestricted access, or specify your IP ranges for security
+# Get your IP using: scripts/get-my-ip.sh (Linux/Mac) or scripts/get-my-ip.bat (Windows)
+# aks_authorized_ip_ranges = ["YOUR_IP/32"]
+# Example with multiple IPs:
+# aks_authorized_ip_ranges = ["203.0.113.5/32", "198.51.100.0/24", "192.0.2.10/32"]
+
 # Environment
 environment = "dev"
 

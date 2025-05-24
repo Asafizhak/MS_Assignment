@@ -54,6 +54,7 @@ module "aks" {
 
   acr_id                     = module.acr.id
   enable_acr_role_assignment = var.aks_enable_acr_role_assignment
+  authorized_ip_ranges       = var.aks_authorized_ip_ranges
   tags                       = var.common_tags
 
   depends_on = [module.acr]

@@ -217,3 +217,27 @@ dev-deploy-all: dev-apply aks-creds nginx-install ## Deploy everything for devel
 
 prod-deploy-all: prod-apply aks-creds nginx-install ## Deploy everything for production
 	@echo "🎉 Production deployment finished!"
+# Get your public IP for authorized ranges
+get-my-ip: ## Get your public IP address for AKS authorized ranges
+	@echo "🔍 Getting your public IP address..."
+	@if exist scripts\get-my-ip.bat ( \
+		scripts\get-my-ip.bat \
+	) else ( \
+		chmod +x scripts/get-my-ip.sh && ./scripts/get-my-ip.sh \
+	)
+
+# Test AKS cluster connectivity
+test-connection: ## Test AKS cluster connectivity
+	@echo "🔗 Testing AKS cluster connectivity..."
+	@CLUSTER_NAME=$$(terraform output -raw aks_cluster_name 2>/dev/null || echo ""); \
+	RG_NAME=$$(terraform output -raw resource_group_name 2>/dev/null || echo ""); \
+	if [ -z "$$CLUSTER_NAME" ] || [ -z "$$RG_NAME" ]; then \
+		echo "❌ AKS cluster not deployed yet. Run 'make apply' first."; \
+	else \
+		echo "📋 Getting AKS credentials..."; \
+		az aks get-credentials --resource-group $$RG_NAME --name $$CLUSTER_NAME --overwrite-existing; \
+		echo "🧪 Testing cluster connectivity..."; \
+		kubectl cluster-info; \
+		echo "📊 Checking node status..."; \
+		kubectl get nodes; \
+	fi

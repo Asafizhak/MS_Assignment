@@ -33,7 +33,37 @@ make acr-integration
 **Option C: Enable Automatic Role Assignment**
 Set `aks_enable_acr_role_assignment = true` in your `.tfvars` file if you have the required permissions.
 
-### 2. Azure AD Integration Deprecation Warning
+### 2. Cluster Access Configuration
+
+**Issue:** Cannot connect to AKS cluster
+
+**For Private Clusters:**
+- Use Azure Cloud Shell (recommended)
+- Deploy Jump Box in same VNet
+- Configure VPN or ExpressRoute
+- Use Azure Bastion
+
+**For Public Clusters:**
+- Configure authorized IP ranges for security
+- Get your IP: `make get-my-ip` or `scripts/get-my-ip.sh`
+- Test connectivity: `make test-connection`
+
+**Solution:**
+```bash
+# Get your public IP
+make get-my-ip
+
+# Add to terraform.tfvars
+aks_authorized_ip_ranges = ["YOUR_IP/32"]
+
+# Apply changes
+terraform apply
+
+# Test connection
+make test-connection
+```
+
+### 3. Azure AD Integration Deprecation Warning
 
 **Warning:**
 ```

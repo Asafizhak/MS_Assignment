@@ -145,3 +145,16 @@ variable "aks_enable_acr_role_assignment" {
   type        = bool
   default     = false
 }
+
+variable "aks_authorized_ip_ranges" {
+  description = "List of authorized IP ranges that can access the AKS API server (leave null for unrestricted access)"
+  type        = list(string)
+  default     = null
+  
+  validation {
+    condition = var.aks_authorized_ip_ranges == null || alltrue([
+      for ip in var.aks_authorized_ip_ranges : can(cidrhost(ip, 0))
+    ])
+    error_message = "All IP ranges must be valid CIDR blocks (e.g., '203.0.113.0/24' or '203.0.113.5/32')."
+  }
+}

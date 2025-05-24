@@ -6,10 +6,9 @@ resource "azurerm_kubernetes_cluster" "main" {
   dns_prefix          = var.dns_prefix
   sku_tier            = var.sku_tier
 
-  # Private cluster configuration
-  private_cluster_enabled             = true
-  private_dns_zone_id                 = "System"
-  private_cluster_public_fqdn_enabled = false
+  # Public cluster configuration with security
+  private_cluster_enabled         = false
+  api_server_authorized_ip_ranges = var.authorized_ip_ranges
 
   # Default node pool
   default_node_pool {
