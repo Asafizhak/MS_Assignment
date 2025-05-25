@@ -276,7 +276,7 @@ For issues and questions:
 3. Check NGINX Ingress Controller documentation
 4. Use `make help` for available commands
 
-## References
+## References.
 
 - [Azure Kubernetes Service Documentation](https://docs.microsoft.com/en-us/azure/aks/)
 - [NGINX Ingress Controller](https://kubernetes.github.io/ingress-nginx/)
