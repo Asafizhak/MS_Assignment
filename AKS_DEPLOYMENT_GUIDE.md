@@ -12,7 +12,7 @@ This guide covers the deployment of Azure Kubernetes Service (AKS) with NGINX In
 2. **Azure Kubernetes Service (AKS)** - Private cluster with system-assigned managed identity
 3. **Virtual Network** - Custom VNet with dedicated subnets
 4. **NGINX Ingress Controller** - Internal load balancer configuration
-5. **Role Assignments** - ACR pull permissions for AKS
+5. **Role Assignments** - ACR pull permissions for AKS (automatically configured)
 
 ### Network Configuration
 
@@ -101,6 +101,16 @@ kubectl get pods -n ingress-nginx
 kubectl get svc -n ingress-nginx
 ```
 
+### Step 5: Verify ACR Integration
+
+```bash
+# Check ACR role assignment
+az role assignment list --scope $(terraform output -raw acr_id) --query "[?roleDefinitionName=='AcrPull']"
+
+# Test pulling from ACR (example)
+kubectl run test-acr --image=$(terraform output -raw acr_login_server)/hello-world:latest --rm -it --restart=Never
+```
+
 ## Environment Configurations
 
 ### Development Environment
@@ -181,8 +191,11 @@ spec:
 
 3. **ACR pull issues**
    ```bash
-   # Verify role assignment
+   # Verify role assignment (should be automatically created)
    az role assignment list --scope $(terraform output -raw acr_id)
+   
+   # If role assignment is missing, run the setup script
+   ./scripts/setup-acr-integration.sh
    ```
 
 ### Validation Commands

@@ -24,7 +24,7 @@ aks_dns_service_ip                   = "10.1.0.10"
 aks_service_cidr                     = "10.1.0.0/16"
 aks_enable_nginx_ingress             = true
 aks_nginx_ingress_replica_count      = 1
-aks_enable_acr_role_assignment       = false  # Set to true if service principal has User Access Administrator role
+aks_enable_acr_role_assignment       = true   # ACR integration enabled by default
 
 # Authorized IP ranges for AKS API server access (for public clusters)
 # Leave commented for unrestricted access, or specify your IP ranges for security

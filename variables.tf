@@ -143,7 +143,7 @@ variable "aks_nginx_ingress_replica_count" {
 variable "aks_enable_acr_role_assignment" {
   description = "Enable automatic ACR role assignment (requires User Access Administrator permissions)"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "aks_authorized_ip_ranges" {
