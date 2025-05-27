@@ -59,6 +59,7 @@ helm upgrade --install nginx-ingress ingress-nginx/ingress-nginx \
     --set controller.resources.requests.memory=128Mi \
     --set controller.resources.limits.cpu=200m \
     --set controller.resources.limits.memory=256Mi \
+    --set controller.progressDeadlineSeconds=600 \
     --wait
 
 # Wait for the ingress controller to be ready
