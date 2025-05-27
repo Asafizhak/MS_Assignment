@@ -3,6 +3,9 @@ provider "azurerm" {
   features {}
 }
 
+# Configure the Azure AD Provider
+provider "azuread" {}
+
 # Note: Helm and Kubernetes providers are configured in the nginx-ingress module
 # to avoid circular dependencies with AKS cluster creation
 
