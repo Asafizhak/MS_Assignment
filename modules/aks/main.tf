@@ -92,3 +92,14 @@ resource "azurerm_role_assignment" "aks_acr_pull" {
   role_definition_name = "AcrPull"
   principal_id         = azurerm_kubernetes_cluster.main.kubelet_identity[0].object_id
 }
+
+# Data source to get current client (service principal) configuration
+data "azurerm_client_config" "current" {}
+
+# Role assignment for service principal to have RBAC Admin access to AKS cluster
+# This allows the service principal to manage Kubernetes resources via kubectl/helm
+resource "azurerm_role_assignment" "aks_rbac_admin" {
+  scope                = azurerm_kubernetes_cluster.main.id
+  role_definition_name = "Azure Kubernetes Service RBAC Admin"
+  principal_id         = data.azurerm_client_config.current.object_id
+}
