@@ -3,11 +3,9 @@ provider "azurerm" {
   features {}
 }
 
-# Configure the Azure AD Provider
-provider "azuread" {}
-
 # Note: Helm and Kubernetes providers are configured in the nginx-ingress module
 # to avoid circular dependencies with AKS cluster creation
+# Note: RBAC permissions are managed manually via Azure Portal
 
 # Data source to get current client configuration
 data "azurerm_client_config" "current" {}

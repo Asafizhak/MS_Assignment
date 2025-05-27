@@ -93,20 +93,6 @@ resource "azurerm_role_assignment" "aks_acr_pull" {
   principal_id         = azurerm_kubernetes_cluster.main.kubelet_identity[0].object_id
 }
 
-# Data source to get current client (service principal) configuration
-data "azurerm_client_config" "current" {}
-
-# Get the service principal object ID using the client ID
-data "azuread_service_principal" "current" {
-  client_id = data.azurerm_client_config.current.client_id
-}
-
-# Role assignment for service principal to have RBAC Admin access to AKS cluster
-# This allows the service principal to manage Kubernetes resources via kubectl/helm
-resource "azurerm_role_assignment" "aks_rbac_admin" {
-  scope                = azurerm_kubernetes_cluster.main.id
-  role_definition_name = "Azure Kubernetes Service RBAC Admin"
-  principal_id         = data.azuread_service_principal.current.object_id
-  
-  depends_on = [azurerm_kubernetes_cluster.main]
-}
+# Note: RBAC permissions are managed manually via Azure Portal
+# Service principal has been granted "Azure Kubernetes Service RBAC Admin" role
+# on the AKS cluster for kubectl/helm operations
