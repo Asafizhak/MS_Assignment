@@ -34,6 +34,10 @@ kubelogin convert-kubeconfig -l spn
 echo "🔍 Verifying connection to AKS cluster..."
 kubectl cluster-info
 
+# Test basic connectivity
+echo "🔍 Testing basic cluster connectivity..."
+kubectl get nodes
+
 # Create namespace for ingress-nginx
 echo "📦 Creating ingress-nginx namespace..."
 kubectl create namespace ingress-nginx --dry-run=client -o yaml | kubectl apply -f -

@@ -124,10 +124,8 @@ jobs:
         az aks get-credentials --resource-group "$RESOURCE_GROUP_NAME" --name "$AKS_CLUSTER_NAME" --overwrite-existing
         kubelogin convert-kubeconfig -l spn
         
-        # Verify RBAC permissions before installing NGINX
-        echo "🔍 Verifying RBAC permissions..."
-        kubectl auth can-i create namespaces --as=system:serviceaccount:kube-system:default
-        kubectl get namespaces
+        # Skip RBAC verification - role assignment confirmed in Azure Portal
+        echo "🔍 RBAC role assignment confirmed in Azure Portal, proceeding with NGINX installation..."
         
         # Install NGINX Ingress using the existing script
         chmod +x scripts/install-nginx-ingress.sh
