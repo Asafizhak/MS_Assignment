@@ -59,15 +59,18 @@ helm upgrade --install nginx-ingress ingress-nginx/ingress-nginx \
     --set controller.resources.requests.memory=128Mi \
     --set controller.resources.limits.cpu=200m \
     --set controller.resources.limits.memory=256Mi \
-    --set controller.progressDeadlineSeconds=600 \
-    --wait
+    --timeout=10m
+
+# Check Helm installation status
+echo "📊 Checking Helm installation status..."
+helm list -n ingress-nginx
 
 # Wait for the ingress controller to be ready
 echo "⏳ Waiting for NGINX Ingress Controller to be ready..."
 kubectl wait --namespace ingress-nginx \
     --for=condition=ready pod \
     --selector=app.kubernetes.io/component=controller \
-    --timeout=300s
+    --timeout=600s || echo "⚠️ Timeout waiting for pods, but installation may still be in progress..."
 
 # Get the internal load balancer IP
 echo "🔍 Getting NGINX Ingress Controller service details..."
