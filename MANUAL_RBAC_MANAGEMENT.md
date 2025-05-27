@@ -16,7 +16,7 @@ You are now managing AKS RBAC permissions manually via the Azure Portal instead 
 - ✅ **Full Control**: You decide exactly who gets access
 - ✅ **Immediate Effect**: No waiting for Terraform propagation
 - ✅ **Flexible**: Easy to add/remove users and service principals
-- ✅ **Auditable**: Clear visibility in Azure Portal..
+- ✅ **Auditable**: Clear visibility in Azure Portal.
 
 ## 🔧 Current RBAC Setup
 
