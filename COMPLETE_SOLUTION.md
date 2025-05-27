@@ -218,4 +218,4 @@ Your NGINX Ingress Controller integration is now **completely fixed** and ready 
 **RBAC**: ✅ Properly Configured  
 **CI/CD**: ✅ Fully Automated
 
-Push to main branch and watch your complete AKS infrastructure with NGINX Ingress Controller deploy successfully! 🚀
+Push to main branch and watch your complete AKS infrastructure with NGINX Ingress Controller deploy successfully! 🚀.
