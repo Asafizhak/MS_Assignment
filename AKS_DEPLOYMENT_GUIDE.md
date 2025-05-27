@@ -77,14 +77,16 @@ kubectl cluster-info
 kubectl get nodes
 ```
 
-### Step 3: Install NGINX Ingress Controller
+### Step 3: Verify NGINX Ingress Controller (Automatically Installed)
 
 ```bash
-# Install NGINX Ingress with internal load balancer
-make nginx-install
-
+# NGINX Ingress Controller is now installed automatically via Terraform!
 # Check installation status
 make nginx-status
+
+# View NGINX pods and services
+kubectl get pods -n ingress-nginx
+kubectl get svc -n ingress-nginx
 ```
 
 ### Step 4: Verify Deployment
@@ -139,14 +141,33 @@ aks_max_node_count   = 5
 
 ## NGINX Ingress Configuration
 
-### Internal Load Balancer
+### Automated Installation via Terraform
 
-The NGINX Ingress Controller is configured with:
+The NGINX Ingress Controller is now **automatically installed** during AKS cluster deployment using Terraform Helm provider with the following configuration:
 
-- **Service Type**: LoadBalancer
+- **Installation Method**: Terraform Helm resource (no manual steps required)
+- **Service Type**: LoadBalancer with internal Azure Load Balancer
 - **Internal Annotation**: `service.beta.kubernetes.io/azure-load-balancer-internal: "true"`
-- **Resource Limits**: CPU 200m, Memory 256Mi
+- **Resource Limits**: CPU 100m-200m requests/limits, Memory 128Mi-256Mi
 - **Node Selector**: Linux nodes only
+- **Replica Count**: Configurable via `aks_nginx_ingress_replica_count` variable
+- **Chart Version**: Configurable via `nginx_ingress_chart_version` variable
+- **Namespace**: `ingress-nginx` (created automatically)
+
+### Configuration Variables
+
+Control NGINX Ingress installation through Terraform variables:
+
+```hcl
+# Enable/disable NGINX Ingress Controller
+aks_enable_nginx_ingress = true
+
+# Number of NGINX controller replicas
+aks_nginx_ingress_replica_count = 1
+
+# Helm chart version (optional)
+nginx_ingress_chart_version = "4.8.3"
+```
 
 ### Example Ingress Resource
 

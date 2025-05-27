@@ -53,3 +53,44 @@ output "nodes_subnet_id" {
   description = "The ID of the nodes subnet"
   value       = azurerm_subnet.aks_nodes.id
 }
+
+# Outputs required for Helm and Kubernetes providers
+output "host" {
+  description = "The Kubernetes cluster server host"
+  value       = azurerm_kubernetes_cluster.main.kube_config.0.host
+  sensitive   = true
+}
+
+output "client_certificate" {
+  description = "Base64 encoded public certificate used by clients to authenticate to the Kubernetes cluster"
+  value       = azurerm_kubernetes_cluster.main.kube_config.0.client_certificate
+  sensitive   = true
+}
+
+output "client_key" {
+  description = "Base64 encoded private key used by clients to authenticate to the Kubernetes cluster"
+  value       = azurerm_kubernetes_cluster.main.kube_config.0.client_key
+  sensitive   = true
+}
+
+output "cluster_ca_certificate" {
+  description = "Base64 encoded public CA certificate used as the root of trust for the Kubernetes cluster"
+  value       = azurerm_kubernetes_cluster.main.kube_config.0.cluster_ca_certificate
+  sensitive   = true
+}
+
+# NGINX Ingress Controller outputs
+output "nginx_ingress_enabled" {
+  description = "Whether NGINX Ingress Controller is enabled"
+  value       = var.enable_nginx_ingress
+}
+
+output "nginx_ingress_namespace" {
+  description = "The namespace where NGINX Ingress Controller is deployed"
+  value       = var.enable_nginx_ingress ? kubernetes_namespace.ingress_nginx[0].metadata[0].name : null
+}
+
+output "nginx_ingress_chart_version" {
+  description = "The version of NGINX Ingress Controller Helm chart"
+  value       = var.enable_nginx_ingress ? var.nginx_ingress_chart_version : null
+}

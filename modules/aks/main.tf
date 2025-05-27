@@ -7,8 +7,14 @@ resource "azurerm_kubernetes_cluster" "main" {
   sku_tier            = var.sku_tier
 
   # Public cluster configuration with security
-  private_cluster_enabled         = false
-  api_server_authorized_ip_ranges = var.authorized_ip_ranges
+  private_cluster_enabled = false
+  
+  dynamic "api_server_access_profile" {
+    for_each = var.authorized_ip_ranges != null ? [1] : []
+    content {
+      authorized_ip_ranges = var.authorized_ip_ranges
+    }
+  }
 
   # Default node pool
   default_node_pool {
@@ -45,8 +51,8 @@ resource "azurerm_kubernetes_cluster" "main" {
   role_based_access_control_enabled = true
 
   azure_active_directory_role_based_access_control {
-    managed            = true
-    azure_rbac_enabled = true
+    managed                = true
+    azure_rbac_enabled     = true
   }
 
   tags = var.tags
@@ -71,19 +77,82 @@ resource "azurerm_subnet" "aks_nodes" {
 }
 
 
-# Note: NGINX Ingress Controller will be installed via kubectl/helm after cluster creation
-# This is to avoid circular dependencies with the Helm provider
-# Use the following commands after cluster deployment:
-#
-# kubectl create namespace ingress-nginx
-# helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
-# helm repo update
-# helm install nginx-ingress ingress-nginx/ingress-nginx \
-#   --namespace ingress-nginx \
-#   --set controller.service.type=LoadBalancer \
-#   --set controller.service.annotations."service\.beta\.kubernetes\.io/azure-load-balancer-internal"=true \
-#   --set controller.replicaCount=1 \
-#   --set controller.nodeSelector."kubernetes\.io/os"=linux
+# Kubernetes namespace for NGINX Ingress Controller
+resource "kubernetes_namespace" "ingress_nginx" {
+  count = var.enable_nginx_ingress ? 1 : 0
+  
+  metadata {
+    name = "ingress-nginx"
+    labels = {
+      name = "ingress-nginx"
+    }
+  }
+
+  depends_on = [azurerm_kubernetes_cluster.main]
+}
+
+# NGINX Ingress Controller Helm Release
+resource "helm_release" "nginx_ingress" {
+  count = var.enable_nginx_ingress ? 1 : 0
+
+  name       = "nginx-ingress"
+  repository = "https://kubernetes.github.io/ingress-nginx"
+  chart      = "ingress-nginx"
+  version    = var.nginx_ingress_chart_version
+  namespace  = kubernetes_namespace.ingress_nginx[0].metadata[0].name
+
+  # Controller configuration
+  set {
+    name  = "controller.service.type"
+    value = "LoadBalancer"
+  }
+
+  set {
+    name  = "controller.service.annotations.service\\.beta\\.kubernetes\\.io/azure-load-balancer-internal"
+    value = "true"
+  }
+
+  set {
+    name  = "controller.replicaCount"
+    value = var.nginx_ingress_replica_count
+  }
+
+  set {
+    name  = "controller.nodeSelector.kubernetes\\.io/os"
+    value = "linux"
+  }
+
+  # Resource limits for cost optimization
+  set {
+    name  = "controller.resources.requests.cpu"
+    value = "100m"
+  }
+
+  set {
+    name  = "controller.resources.requests.memory"
+    value = "128Mi"
+  }
+
+  set {
+    name  = "controller.resources.limits.cpu"
+    value = "200m"
+  }
+
+  set {
+    name  = "controller.resources.limits.memory"
+    value = "256Mi"
+  }
+
+  # Wait for deployment to be ready
+  wait          = true
+  wait_for_jobs = true
+  timeout       = 600
+
+  depends_on = [
+    azurerm_kubernetes_cluster.main,
+    kubernetes_namespace.ingress_nginx
+  ]
+}
 
 # Role assignment for AKS to pull from ACR
 # Note: This requires the service principal to have User Access Administrator role

@@ -81,3 +81,19 @@ output "aks_nodes_subnet_id" {
   description = "The ID of the AKS nodes subnet"
   value       = module.aks.nodes_subnet_id
 }
+
+# NGINX Ingress Controller Outputs
+output "nginx_ingress_enabled" {
+  description = "Whether NGINX Ingress Controller is enabled"
+  value       = module.aks.nginx_ingress_enabled
+}
+
+output "nginx_ingress_namespace" {
+  description = "The namespace where NGINX Ingress Controller is deployed"
+  value       = module.aks.nginx_ingress_namespace
+}
+
+output "nginx_ingress_chart_version" {
+  description = "The version of NGINX Ingress Controller Helm chart"
+  value       = module.aks.nginx_ingress_chart_version
+}
