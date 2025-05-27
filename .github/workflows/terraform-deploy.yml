@@ -102,8 +102,17 @@ jobs:
         chmod +x kubectl
         sudo mv kubectl /usr/local/bin/
         
+        # Install kubelogin (required for Azure AD enabled AKS clusters)
+        curl -LO "https://github.com/Azure/kubelogin/releases/latest/download/kubelogin-linux-amd64.zip"
+        unzip kubelogin-linux-amd64.zip
+        sudo mv bin/linux_amd64/kubelogin /usr/local/bin/
+        
         # Install Helm
         curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+        
+        # Set environment variables for kubelogin service principal authentication
+        export AAD_SERVICE_PRINCIPAL_CLIENT_ID=$ARM_CLIENT_ID
+        export AAD_SERVICE_PRINCIPAL_CLIENT_SECRET=$ARM_CLIENT_SECRET
         
         # Install NGINX Ingress using the existing script
         chmod +x scripts/install-nginx-ingress.sh

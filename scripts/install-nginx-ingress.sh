@@ -26,6 +26,10 @@ RESOURCE_GROUP=${2:-"rg-acr-aks-demo-dev"}
 echo "📋 Getting AKS credentials for cluster: $CLUSTER_NAME in resource group: $RESOURCE_GROUP"
 az aks get-credentials --resource-group "$RESOURCE_GROUP" --name "$CLUSTER_NAME" --overwrite-existing
 
+# For Azure AD enabled clusters, convert kubeconfig to use service principal authentication
+echo "🔑 Converting kubeconfig for service principal authentication..."
+kubelogin convert-kubeconfig -l spn
+
 # Verify connection to cluster
 echo "🔍 Verifying connection to AKS cluster..."
 kubectl cluster-info
