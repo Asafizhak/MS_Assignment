@@ -194,7 +194,7 @@ nginx-install: ## Install NGINX Ingress Controller
 		./scripts/install-nginx-ingress.sh $$CLUSTER_NAME $$RG_NAME; \
 	fi
 
-nginx-status: ## Check NGINX Ingress Controller status
+nginx-status: ## Check NGINX Ingress Controller status.
 	@echo "📊 NGINX Ingress Controller Status:"
 	@kubectl get pods -n ingress-nginx 2>/dev/null || echo "❌ NGINX Ingress not installed or kubectl not configured"
 	@echo ""
