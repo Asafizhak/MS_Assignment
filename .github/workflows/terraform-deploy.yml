@@ -88,6 +88,15 @@ jobs:
         AKS_CLUSTER_NAME=$(terraform output -raw aks_cluster_name)
         RESOURCE_GROUP_NAME=$(terraform output -raw resource_group_name)
         
+        # Login to Azure CLI using service principal
+        az login --service-principal \
+          --username $ARM_CLIENT_ID \
+          --password $ARM_CLIENT_SECRET \
+          --tenant $ARM_TENANT_ID
+        
+        # Set default subscription
+        az account set --subscription $ARM_SUBSCRIPTION_ID
+        
         # Install kubectl
         curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
         chmod +x kubectl
@@ -99,6 +108,19 @@ jobs:
         # Install NGINX Ingress using the existing script
         chmod +x scripts/install-nginx-ingress.sh
         ./scripts/install-nginx-ingress.sh "$AKS_CLUSTER_NAME" "$RESOURCE_GROUP_NAME"
+        
+        # Verify NGINX Ingress installation
+        echo "🔍 Verifying NGINX Ingress Controller installation..."
+        kubectl get pods -n ingress-nginx
+        kubectl get svc -n ingress-nginx
+        
+        # Check if NGINX controller is ready
+        kubectl wait --namespace ingress-nginx \
+          --for=condition=ready pod \
+          --selector=app.kubernetes.io/component=controller \
+          --timeout=300s
+        
+        echo "✅ NGINX Ingress Controller installation completed successfully!"
       env:
         ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
         ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
