@@ -77,82 +77,9 @@ resource "azurerm_subnet" "aks_nodes" {
 }
 
 
-# Kubernetes namespace for NGINX Ingress Controller
-resource "kubernetes_namespace" "ingress_nginx" {
-  count = var.enable_nginx_ingress ? 1 : 0
-  
-  metadata {
-    name = "ingress-nginx"
-    labels = {
-      name = "ingress-nginx"
-    }
-  }
-
-  depends_on = [azurerm_kubernetes_cluster.main]
-}
-
-# NGINX Ingress Controller Helm Release
-resource "helm_release" "nginx_ingress" {
-  count = var.enable_nginx_ingress ? 1 : 0
-
-  name       = "nginx-ingress"
-  repository = "https://kubernetes.github.io/ingress-nginx"
-  chart      = "ingress-nginx"
-  version    = var.nginx_ingress_chart_version
-  namespace  = kubernetes_namespace.ingress_nginx[0].metadata[0].name
-
-  # Controller configuration
-  set {
-    name  = "controller.service.type"
-    value = "LoadBalancer"
-  }
-
-  set {
-    name  = "controller.service.annotations.service\\.beta\\.kubernetes\\.io/azure-load-balancer-internal"
-    value = "true"
-  }
-
-  set {
-    name  = "controller.replicaCount"
-    value = var.nginx_ingress_replica_count
-  }
-
-  set {
-    name  = "controller.nodeSelector.kubernetes\\.io/os"
-    value = "linux"
-  }
-
-  # Resource limits for cost optimization
-  set {
-    name  = "controller.resources.requests.cpu"
-    value = "100m"
-  }
-
-  set {
-    name  = "controller.resources.requests.memory"
-    value = "128Mi"
-  }
-
-  set {
-    name  = "controller.resources.limits.cpu"
-    value = "200m"
-  }
-
-  set {
-    name  = "controller.resources.limits.memory"
-    value = "256Mi"
-  }
-
-  # Wait for deployment to be ready
-  wait          = true
-  wait_for_jobs = true
-  timeout       = 600
-
-  depends_on = [
-    azurerm_kubernetes_cluster.main,
-    kubernetes_namespace.ingress_nginx
-  ]
-}
+# Note: NGINX Ingress Controller is now installed via separate module
+# after AKS cluster creation to avoid circular dependencies.
+# Use the nginx-ingress module or the install script after cluster deployment.
 
 # Role assignment for AKS to pull from ACR
 # Note: This requires the service principal to have User Access Administrator role

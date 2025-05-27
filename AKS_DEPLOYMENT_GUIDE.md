@@ -77,10 +77,12 @@ kubectl cluster-info
 kubectl get nodes
 ```
 
-### Step 3: Verify NGINX Ingress Controller (Automatically Installed)
+### Step 3: Install NGINX Ingress Controller
 
 ```bash
-# NGINX Ingress Controller is now installed automatically via Terraform!
+# Install NGINX Ingress Controller (post-deployment step)
+make nginx-install
+
 # Check installation status
 make nginx-status
 
@@ -141,33 +143,37 @@ aks_max_node_count   = 5
 
 ## NGINX Ingress Configuration
 
-### Automated Installation via Terraform
+### Post-Deployment Installation
 
-The NGINX Ingress Controller is now **automatically installed** during AKS cluster deployment using Terraform Helm provider with the following configuration:
+The NGINX Ingress Controller is installed **after AKS cluster deployment** to avoid circular dependencies. The installation is automated through:
 
-- **Installation Method**: Terraform Helm resource (no manual steps required)
+- **GitHub Actions**: Automatically installs NGINX after AKS deployment in CI/CD
+- **Makefile Commands**: `make nginx-install` for manual installation
+- **Installation Script**: [`scripts/install-nginx-ingress.sh`](scripts/install-nginx-ingress.sh)
+
+### Configuration Details
+
 - **Service Type**: LoadBalancer with internal Azure Load Balancer
 - **Internal Annotation**: `service.beta.kubernetes.io/azure-load-balancer-internal: "true"`
 - **Resource Limits**: CPU 100m-200m requests/limits, Memory 128Mi-256Mi
 - **Node Selector**: Linux nodes only
-- **Replica Count**: Configurable via `aks_nginx_ingress_replica_count` variable
-- **Chart Version**: Configurable via `nginx_ingress_chart_version` variable
+- **Replica Count**: 1 (configurable in script)
 - **Namespace**: `ingress-nginx` (created automatically)
 
-### Configuration Variables
+### Installation Methods
 
-Control NGINX Ingress installation through Terraform variables:
-
-```hcl
-# Enable/disable NGINX Ingress Controller
-aks_enable_nginx_ingress = true
-
-# Number of NGINX controller replicas
-aks_nginx_ingress_replica_count = 1
-
-# Helm chart version (optional)
-nginx_ingress_chart_version = "4.8.3"
+**Method 1: Using Makefile (Recommended)**
+```bash
+make nginx-install
 ```
+
+**Method 2: Using Script Directly**
+```bash
+./scripts/install-nginx-ingress.sh <CLUSTER_NAME> <RESOURCE_GROUP>
+```
+
+**Method 3: GitHub Actions (Automatic)**
+- Installs automatically after AKS deployment in CI/CD pipeline
 
 ### Example Ingress Resource
 

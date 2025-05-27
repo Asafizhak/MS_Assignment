@@ -3,23 +3,8 @@ provider "azurerm" {
   features {}
 }
 
-# Configure the Helm Provider
-provider "helm" {
-  kubernetes {
-    host                   = module.aks.host
-    client_certificate     = base64decode(module.aks.client_certificate)
-    client_key             = base64decode(module.aks.client_key)
-    cluster_ca_certificate = base64decode(module.aks.cluster_ca_certificate)
-  }
-}
-
-# Configure the Kubernetes Provider
-provider "kubernetes" {
-  host                   = module.aks.host
-  client_certificate     = base64decode(module.aks.client_certificate)
-  client_key             = base64decode(module.aks.client_key)
-  cluster_ca_certificate = base64decode(module.aks.cluster_ca_certificate)
-}
+# Note: Helm and Kubernetes providers are configured in the nginx-ingress module
+# to avoid circular dependencies with AKS cluster creation
 
 # Data source to get current client configuration
 data "azurerm_client_config" "current" {}

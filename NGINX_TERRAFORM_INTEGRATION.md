@@ -1,246 +1,189 @@
-# NGINX Ingress Controller - Terraform Integration
+# NGINX Ingress Controller - CI/CD Integration Solution
 
 ## 🚀 Overview
 
-NGINX Ingress Controller is now **automatically installed** as part of your AKS cluster deployment using Terraform. No more manual installation steps required!
+NGINX Ingress Controller integration has been **optimized for CI/CD pipelines** to avoid circular dependency issues. The solution uses a **two-step deployment approach** that works reliably in GitHub Actions and other automated environments.
 
-## 📋 Changes Made
+## ⚠️ Problem: Circular Dependencies
 
-### 1. **Added Required Providers**
-**File**: [`versions.tf`](versions.tf)
+When trying to integrate NGINX Ingress Controller directly into Terraform with AKS cluster creation, we encountered:
 
-```hcl
-required_providers {
-  azurerm = {
-    source  = "hashicorp/azurerm"
-    version = "~> 3.0"
-  }
-  helm = {
-    source  = "hashicorp/helm"
-    version = "~> 2.0"
-  }
-  kubernetes = {
-    source  = "hashicorp/kubernetes"
-    version = "~> 2.0"
-  }
-}
+- **Terraform Helm/Kubernetes providers** need cluster credentials during planning phase
+- **Cluster credentials don't exist** during initial deployment
+- **"Unauthorized" errors** in CI/CD pipelines
+- **Complex provider configuration** workarounds that are unreliable
+
+## ✅ Solution: Two-Step Deployment
+
+### **Step 1: Deploy AKS Infrastructure**
+- Deploy AKS cluster and ACR using Terraform
+- No Helm/Kubernetes provider dependencies
+- Clean, reliable infrastructure deployment
+
+### **Step 2: Install NGINX Ingress Post-Deployment**
+- Use existing installation script after cluster is ready
+- Automated in GitHub Actions workflow
+- Reliable kubectl and Helm installation
+
+## 📋 Implementation Details
+
+### **1. Removed Circular Dependencies**
+**Files Modified**: [`main.tf`](main.tf), [`versions.tf`](versions.tf), [`modules/aks/main.tf`](modules/aks/main.tf)
+
+- Removed Helm and Kubernetes providers from main Terraform configuration
+- Removed NGINX Ingress resources from AKS module
+- Clean separation of concerns
+
+### **2. Enhanced GitHub Actions Workflow**
+**File**: [`.github/workflows/terraform-deploy.yml`](.github/workflows/terraform-deploy.yml)
+
+```yaml
+# Step 1: Deploy AKS Infrastructure
+- name: Terraform Apply - AKS Infrastructure
+  run: terraform apply -auto-approve -input=false
+
+# Step 2: Install NGINX Ingress Controller
+- name: Install NGINX Ingress Controller
+  run: |
+    # Get cluster details
+    AKS_CLUSTER_NAME=$(terraform output -raw aks_cluster_name)
+    RESOURCE_GROUP_NAME=$(terraform output -raw resource_group_name)
+    
+    # Install kubectl and Helm
+    curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+    chmod +x kubectl && sudo mv kubectl /usr/local/bin/
+    curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+    
+    # Install NGINX Ingress
+    chmod +x scripts/install-nginx-ingress.sh
+    ./scripts/install-nginx-ingress.sh "$AKS_CLUSTER_NAME" "$RESOURCE_GROUP_NAME"
 ```
 
-### 2. **Added Provider Configurations**
-**File**: [`main.tf`](main.tf)
-
-```hcl
-# Configure the Helm Provider
-provider "helm" {
-  kubernetes {
-    host                   = module.aks.host
-    client_certificate     = base64decode(module.aks.client_certificate)
-    client_key             = base64decode(module.aks.client_key)
-    cluster_ca_certificate = base64decode(module.aks.cluster_ca_certificate)
-  }
-}
-
-# Configure the Kubernetes Provider
-provider "kubernetes" {
-  kubernetes {
-    host                   = module.aks.host
-    client_certificate     = base64decode(module.aks.client_certificate)
-    client_key             = base64decode(module.aks.client_key)
-    cluster_ca_certificate = base64decode(module.aks.cluster_ca_certificate)
-  }
-}
-```
-
-### 3. **Added NGINX Ingress Resources**
-**File**: [`modules/aks/main.tf`](modules/aks/main.tf)
-
-```hcl
-# Kubernetes namespace for NGINX Ingress Controller
-resource "kubernetes_namespace" "ingress_nginx" {
-  count = var.enable_nginx_ingress ? 1 : 0
-  
-  metadata {
-    name = "ingress-nginx"
-    labels = {
-      name = "ingress-nginx"
-    }
-  }
-
-  depends_on = [azurerm_kubernetes_cluster.main]
-}
-
-# NGINX Ingress Controller Helm Release
-resource "helm_release" "nginx_ingress" {
-  count = var.enable_nginx_ingress ? 1 : 0
-
-  name       = "nginx-ingress"
-  repository = "https://kubernetes.github.io/ingress-nginx"
-  chart      = "ingress-nginx"
-  version    = var.nginx_ingress_chart_version
-  namespace  = kubernetes_namespace.ingress_nginx[0].metadata[0].name
-
-  # Controller configuration with internal load balancer
-  set {
-    name  = "controller.service.type"
-    value = "LoadBalancer"
-  }
-
-  set {
-    name  = "controller.service.annotations.service\\.beta\\.kubernetes\\.io/azure-load-balancer-internal"
-    value = "true"
-  }
-
-  set {
-    name  = "controller.replicaCount"
-    value = var.nginx_ingress_replica_count
-  }
-
-  # Resource optimization
-  set {
-    name  = "controller.resources.requests.cpu"
-    value = "100m"
-  }
-
-  set {
-    name  = "controller.resources.limits.memory"
-    value = "256Mi"
-  }
-
-  wait          = true
-  wait_for_jobs = true
-  timeout       = 600
-
-  depends_on = [
-    azurerm_kubernetes_cluster.main,
-    kubernetes_namespace.ingress_nginx
-  ]
-}
-```
-
-### 4. **Added Required Outputs**
-**Files**: [`modules/aks/outputs.tf`](modules/aks/outputs.tf), [`outputs.tf`](outputs.tf)
-
-```hcl
-# Provider connection outputs
-output "host" {
-  description = "The Kubernetes cluster server host"
-  value       = azurerm_kubernetes_cluster.main.kube_config.0.host
-  sensitive   = true
-}
-
-# NGINX Ingress outputs
-output "nginx_ingress_enabled" {
-  description = "Whether NGINX Ingress Controller is enabled"
-  value       = var.enable_nginx_ingress
-}
-```
-
-### 5. **Updated Makefile**
+### **3. Updated Makefile Commands**
 **File**: [`Makefile`](Makefile)
 
-- Updated `nginx-install` command to reflect automated installation
-- Modified deployment workflows to remove manual NGINX installation steps
-- Added status checks after deployment
-
-### 6. **Updated Documentation**
-**File**: [`AKS_DEPLOYMENT_GUIDE.md`](AKS_DEPLOYMENT_GUIDE.md)
-
-- Updated deployment steps to reflect automated NGINX installation
-- Added configuration variables documentation
-- Updated troubleshooting section
-
-## 🎯 Benefits of Terraform Integration
-
-### **Before (Manual Installation)**
-- ❌ Required manual post-deployment steps
-- ❌ Potential for human error
-- ❌ Inconsistent deployments
-- ❌ Complex CI/CD integration
-
-### **After (Terraform Automation)**
-- ✅ **Fully Automated**: NGINX installs with AKS cluster
-- ✅ **Consistent**: Same configuration every time
-- ✅ **Version Controlled**: Configuration tracked in Git
-- ✅ **CI/CD Ready**: No manual intervention required
-- ✅ **Declarative**: Infrastructure as Code principles
-
-## 🔧 Configuration Variables
-
-Control NGINX Ingress installation through these variables:
-
-```hcl
-# Enable/disable NGINX Ingress Controller
-aks_enable_nginx_ingress = true
-
-# Number of NGINX controller replicas
-aks_nginx_ingress_replica_count = 1
-
-# Helm chart version
-nginx_ingress_chart_version = "4.8.3"
+```bash
+# Complete deployment workflow
+deploy-all: apply aks-creds nginx-install
+dev-deploy-all: dev-apply aks-creds nginx-install
+prod-deploy-all: prod-apply aks-creds nginx-install
 ```
 
-## 🚀 Deployment Workflow
+### **4. Created NGINX Ingress Module (Optional)**
+**Files**: [`modules/nginx-ingress/`](modules/nginx-ingress/)
 
-### **New Simplified Workflow**
+- Standalone module for future Terraform-based installation
+- Can be used when cluster already exists
+- Avoids circular dependency issues
 
+## 🚀 New Deployment Experience
+
+### **Local Development**
 ```bash
-# 1. Deploy everything (AKS + NGINX automatically)
+# Deploy AKS cluster
 make dev-apply
 
-# 2. Get cluster credentials
+# Get cluster credentials
 make aks-creds
 
-# 3. Verify NGINX installation (automatic)
-make nginx-status
+# Install NGINX Ingress
+make nginx-install
+
+# Or use the complete workflow
+make dev-deploy-all
 ```
 
-### **What Happens Automatically**
+### **CI/CD Pipeline (GitHub Actions)**
+```bash
+# Automatically runs on push to main:
+# 1. Deploy AKS infrastructure
+# 2. Install NGINX Ingress Controller
+# 3. Output deployment summary
+```
 
-1. **AKS Cluster** is created
-2. **Kubernetes Namespace** `ingress-nginx` is created
-3. **NGINX Ingress Controller** is installed via Helm
-4. **Azure Load Balancer** is created automatically
-5. **Internal IP** is assigned from VNet range
+## 🏗️ Architecture Flow
 
-## 📊 Verification Commands
+```mermaid
+graph TB
+    subgraph "Step 1: Infrastructure"
+        TF[Terraform Apply]
+        AKS[AKS Cluster]
+        ACR[Azure Container Registry]
+    end
+    
+    subgraph "Step 2: NGINX Installation"
+        SCRIPT[install-nginx-ingress.sh]
+        KUBECTL[kubectl + Helm]
+        NGINX[NGINX Controller]
+        LB[Azure Load Balancer]
+    end
+    
+    TF --> AKS
+    TF --> ACR
+    AKS --> SCRIPT
+    SCRIPT --> KUBECTL
+    KUBECTL --> NGINX
+    NGINX --> LB
+    
+    style TF fill:#4caf50,color:#fff
+    style NGINX fill:#ff9800,color:#fff
+    style LB fill:#2196f3,color:#fff
+```
+
+## ✅ Benefits Achieved
+
+- **🔄 Reliable CI/CD**: No more circular dependency errors
+- **📦 Clean Separation**: Infrastructure and application deployment separated
+- **🎯 Consistent**: Same configuration every deployment
+- **🚀 Automated**: Full automation in GitHub Actions
+- **💰 Cost Optimized**: Resource limits configured appropriately
+- **🔒 Secure**: Internal load balancer configuration maintained
+
+## 🔧 Verification Commands
+
+After deployment, verify the installation:
 
 ```bash
+# Check AKS cluster
+kubectl get nodes
+
 # Check NGINX pods
 kubectl get pods -n ingress-nginx
 
-# Check NGINX services
+# Check NGINX services (should show internal LoadBalancer IP)
 kubectl get svc -n ingress-nginx
 
 # Check Helm releases
 helm list -n ingress-nginx
-
-# View Terraform outputs
-terraform output nginx_ingress_enabled
 ```
 
-## 🔒 Security Configuration
+## 📚 Files Modified
 
-NGINX Ingress Controller is configured with:
+### **Core Infrastructure**
+- [`main.tf`](main.tf) - Removed provider circular dependencies
+- [`versions.tf`](versions.tf) - Cleaned up provider requirements
+- [`modules/aks/main.tf`](modules/aks/main.tf) - Removed NGINX resources
+- [`outputs.tf`](outputs.tf) - Removed NGINX outputs
 
-- **Internal Load Balancer**: Traffic stays within VNet
-- **Resource Limits**: CPU and memory constraints for cost optimization
-- **Linux Node Selector**: Ensures pods run on Linux nodes
-- **Namespace Isolation**: Deployed in dedicated `ingress-nginx` namespace
+### **CI/CD Integration**
+- [`.github/workflows/terraform-deploy.yml`](.github/workflows/terraform-deploy.yml) - Two-step deployment
+- [`Makefile`](Makefile) - Updated deployment workflows
+
+### **Documentation**
+- [`AKS_DEPLOYMENT_GUIDE.md`](AKS_DEPLOYMENT_GUIDE.md) - Updated deployment steps
+- [`NGINX_TERRAFORM_INTEGRATION.md`](NGINX_TERRAFORM_INTEGRATION.md) - This document
+
+### **Optional Modules**
+- [`modules/nginx-ingress/`](modules/nginx-ingress/) - Standalone NGINX module
+- [`nginx-ingress.tf`](nginx-ingress.tf) - Alternative deployment configuration
 
 ## 🎉 Migration Complete
 
-Your NGINX Ingress Controller is now fully integrated into your Terraform infrastructure. The next time you deploy your AKS cluster, NGINX will be installed automatically without any manual intervention required!
-
-## 📚 Next Steps
-
-1. **Deploy the updated infrastructure**: `make dev-apply`
-2. **Verify NGINX installation**: `make nginx-status`
-3. **Create Ingress resources** for your applications
-4. **Test traffic routing** through the internal load balancer
+Your NGINX Ingress Controller integration is now **CI/CD ready** and will work reliably in GitHub Actions without circular dependency issues. The two-step approach ensures consistent, automated deployments every time.
 
 ---
 
 **Integration Date**: $(date)  
-**Status**: ✅ Complete  
-**Installation Method**: Terraform Helm Provider  
-**Manual Steps Required**: None
+**Status**: ✅ Complete - CI/CD Ready  
+**Installation Method**: Two-Step Deployment (AKS → NGINX)  
+**Manual Steps Required**: None (fully automated)

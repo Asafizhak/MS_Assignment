@@ -79,18 +79,4 @@ output "cluster_ca_certificate" {
   sensitive   = true
 }
 
-# NGINX Ingress Controller outputs
-output "nginx_ingress_enabled" {
-  description = "Whether NGINX Ingress Controller is enabled"
-  value       = var.enable_nginx_ingress
-}
-
-output "nginx_ingress_namespace" {
-  description = "The namespace where NGINX Ingress Controller is deployed"
-  value       = var.enable_nginx_ingress ? kubernetes_namespace.ingress_nginx[0].metadata[0].name : null
-}
-
-output "nginx_ingress_chart_version" {
-  description = "The version of NGINX Ingress Controller Helm chart"
-  value       = var.enable_nginx_ingress ? var.nginx_ingress_chart_version : null
-}
+# Note: NGINX Ingress Controller outputs moved to separate nginx-ingress module

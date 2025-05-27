@@ -183,10 +183,16 @@ aks-nodes: ## Show AKS cluster nodes
 	@echo "🖥️  AKS Cluster Nodes:"
 	@kubectl get nodes -o wide 2>/dev/null || echo "❌ Run 'make aks-creds' first to configure kubectl"
 
-nginx-install: ## Install NGINX Ingress Controller (now automated via Terraform)
-	@echo "ℹ️  NGINX Ingress Controller is now installed automatically via Terraform!"
-	@echo "📋 To check status, use: make nginx-status"
-	@echo "💡 If you need to reinstall manually, use the script: ./scripts/install-nginx-ingress.sh"
+nginx-install: ## Install NGINX Ingress Controller
+	@echo "🚀 Installing NGINX Ingress Controller..."
+	@chmod +x scripts/install-nginx-ingress.sh
+	@CLUSTER_NAME=$$(terraform output -raw aks_cluster_name 2>/dev/null || echo ""); \
+	RG_NAME=$$(terraform output -raw resource_group_name 2>/dev/null || echo ""); \
+	if [ -z "$$CLUSTER_NAME" ] || [ -z "$$RG_NAME" ]; then \
+		echo "❌ AKS not deployed yet. Run 'make apply' first."; \
+	else \
+		./scripts/install-nginx-ingress.sh $$CLUSTER_NAME $$RG_NAME; \
+	fi
 
 nginx-status: ## Check NGINX Ingress Controller status.
 	@echo "📊 NGINX Ingress Controller Status:"
@@ -201,20 +207,19 @@ k8s-dashboard: ## Install Kubernetes Dashboard
 	@echo "💡 To access: kubectl proxy then visit http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/"
 
 # Complete deployment workflow
-deploy-all: apply aks-creds ## Deploy everything (ACR + AKS + NGINX Ingress automatically)
+deploy-all: apply aks-creds nginx-install ## Deploy everything (ACR + AKS + NGINX Ingress)
 	@echo "🎉 Complete deployment finished!"
-	@echo "📋 NGINX Ingress Controller installed automatically via Terraform"
 	@echo "📊 Checking NGINX status..."
 	@make nginx-status
 	@echo "📋 Summary:"
 	@terraform output
 
-dev-deploy-all: dev-apply aks-creds ## Deploy everything for development (NGINX included)
+dev-deploy-all: dev-apply aks-creds nginx-install ## Deploy everything for development
 	@echo "🎉 Development deployment finished!"
 	@echo "📊 Checking NGINX status..."
 	@make nginx-status
 
-prod-deploy-all: prod-apply aks-creds ## Deploy everything for production (NGINX included)
+prod-deploy-all: prod-apply aks-creds nginx-install ## Deploy everything for production
 	@echo "🎉 Production deployment finished!"
 	@echo "📊 Checking NGINX status..."
 	@make nginx-status
