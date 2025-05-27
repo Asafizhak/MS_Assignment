@@ -70,10 +70,16 @@ jobs:
         ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
 
     # On push to "main", build or change infrastructure according to Terraform configuration files
-    # Step 1: Deploy AKS cluster and ACR
-    - name: Terraform Apply - AKS Infrastructure
+    # Step 1: Deploy AKS cluster and ACR with RBAC role assignments
+    - name: Terraform Apply - AKS Infrastructure with RBAC
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      run: terraform apply -auto-approve -input=false
+      run: |
+        # Apply Terraform configuration (includes RBAC role assignments)
+        terraform apply -auto-approve -input=false
+        
+        # Wait a moment for role assignments to propagate
+        echo "⏳ Waiting for RBAC role assignments to propagate..."
+        sleep 30
       env:
         ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
         ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
@@ -113,6 +119,15 @@ jobs:
         # Set environment variables for kubelogin service principal authentication
         export AAD_SERVICE_PRINCIPAL_CLIENT_ID=$ARM_CLIENT_ID
         export AAD_SERVICE_PRINCIPAL_CLIENT_SECRET=$ARM_CLIENT_SECRET
+        
+        # Get AKS credentials and configure kubelogin
+        az aks get-credentials --resource-group "$RESOURCE_GROUP_NAME" --name "$AKS_CLUSTER_NAME" --overwrite-existing
+        kubelogin convert-kubeconfig -l spn
+        
+        # Verify RBAC permissions before installing NGINX
+        echo "🔍 Verifying RBAC permissions..."
+        kubectl auth can-i create namespaces --as=system:serviceaccount:kube-system:default
+        kubectl get namespaces
         
         # Install NGINX Ingress using the existing script
         chmod +x scripts/install-nginx-ingress.sh
