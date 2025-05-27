@@ -47,6 +47,14 @@ echo "📚 Adding NGINX Ingress Helm repository..."
 helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
 helm repo update
 
+# Clean up any existing installation first
+echo "🧹 Cleaning up any existing NGINX Ingress installation..."
+helm uninstall nginx-ingress -n ingress-nginx --ignore-not-found || true
+kubectl delete deployment nginx-ingress-ingress-nginx-controller -n ingress-nginx --ignore-not-found || true
+
+# Wait a moment for cleanup
+sleep 10
+
 # Install NGINX Ingress Controller
 echo "⚙️ Installing NGINX Ingress Controller..."
 helm upgrade --install nginx-ingress ingress-nginx/ingress-nginx \
@@ -59,6 +67,8 @@ helm upgrade --install nginx-ingress ingress-nginx/ingress-nginx \
     --set controller.resources.requests.memory=128Mi \
     --set controller.resources.limits.cpu=200m \
     --set controller.resources.limits.memory=256Mi \
+    --set controller.progressDeadlineSeconds=600 \
+    --set controller.minReadySeconds=0 \
     --timeout=10m
 
 # Check Helm installation status
