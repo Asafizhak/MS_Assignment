@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Script to install NGINX Ingress Controller on AKS cluster
-# This script should be run after the AKS cluster is deployed
+# This script should be run after the AKS cluster is deployed.
 
 set -e
 
