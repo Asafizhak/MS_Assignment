@@ -24,7 +24,7 @@ graph TB
     subgraph "Azure Subscription"
         subgraph "Resource Group: rg-acr-demo"
             subgraph "Azure Container Registry"
-                ACR[Azure Container Registry<br/>acrmsassignment2025<br/>SKU: Basic<br/>Admin: Enabled]
+                ACR[Azure Container Registry<br/>acrmsassignment20251<br/>SKU: Basic<br/>Admin: Enabled]
             end
             
             subgraph "Virtual Network: 10.0.0.0/16"
@@ -242,7 +242,7 @@ network_profile:
 
 | Configuration | Value | Purpose |
 |---------------|-------|---------|
-| **Name** | `acrmsassignment2025` | Unique registry name |
+| **Name** | `acrmsassignment20251` | Unique registry name |
 | **SKU** | `Basic` | Cost-optimized tier |
 | **Admin Enabled** | `true` | Simplified access |
 | **Public Access** | `Enabled` | CI/CD integration |

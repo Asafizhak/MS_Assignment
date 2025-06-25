@@ -6,7 +6,7 @@ resource_group_name = "rg-acr-aks-demo-dev"
 location           = "West Europe"
 
 # ACR Configuration
-acr_name = "acrmsassignment2025"  # Must be globally unique, 5-50 alphanumeric characters
+acr_name = "acrmsassignment20251"  # Must be globally unique, 5-50 alphanumeric characters
 acr_sku  = "Basic"          # Basic is the cheapest option
 
 # AKS Configuration
