@@ -5,7 +5,7 @@ This document explains how the Terraform state is configured to use Azure Blob S
 ## Backend Configuration
 
 ### Current Setup
-- **Storage Account**: `msassignmenttfstate`
+- **Storage Account**: `msassignmenttfstate1`
 - **Resource Group**: `Storage_SG`
 - **Container**: `tfstate`
 - **State File**: `acr-demo.terraform.tfstate`
@@ -17,7 +17,7 @@ The backend configuration uses individual command-line parameters:
 ```bash
 terraform init \
   -backend-config="resource_group_name=Storage_SG" \
-  -backend-config="storage_account_name=msassignmenttfstate" \
+  -backend-config="storage_account_name=msassignmenttfstate1" \
   -backend-config="container_name=tfstate" \
   -backend-config="key=acr-demo.terraform.tfstate"
 ```
@@ -31,7 +31,7 @@ The GitHub Actions workflow automatically uses the remote state:
   run: |
     terraform init \
       -backend-config="resource_group_name=Storage_SG" \
-      -backend-config="storage_account_name=msassignmenttfstate" \
+      -backend-config="storage_account_name=msassignmenttfstate1" \
       -backend-config="container_name=tfstate" \
       -backend-config="key=acr-demo.terraform.tfstate"
 ```
@@ -45,7 +45,7 @@ make init
 # Direct Terraform command
 terraform init \
   -backend-config="resource_group_name=Storage_SG" \
-  -backend-config="storage_account_name=msassignmenttfstate" \
+  -backend-config="storage_account_name=msassignmenttfstate1" \
   -backend-config="container_name=tfstate" \
   -backend-config="key=acr-demo.terraform.tfstate"
 ```
@@ -106,7 +106,7 @@ Error: container "tfstate" was not found
 
 #### 3. **Storage Account Not Found**
 ```
-Error: storage account "msassignmenttfstate" was not found
+Error: storage account "msassignmenttfstate1" was not found
 ```
 **Solution**: Verify the storage account name and ensure it exists in the specified resource group.
 
@@ -118,10 +118,10 @@ Check if your storage account is accessible:
 az storage account list --resource-group Storage_SG
 
 # Check container exists
-az storage container list --account-name msassignmenttfstate
+az storage container list --account-name msassignmenttfstate1
 
 # Verify permissions
-az role assignment list --assignee <service-principal-id> --scope /subscriptions/<subscription-id>/resourceGroups/Storage_SG/providers/Microsoft.Storage/storageAccounts/msassignmenttfstate
+az role assignment list --assignee <service-principal-id> --scope /subscriptions/<subscription-id>/resourceGroups/Storage_SG/providers/Microsoft.Storage/storageAccounts/msassignmenttfstate1
 ```
 
 ## State Migration
@@ -197,7 +197,7 @@ For critical deployments:
 ```bash
 # Download current state
 az storage blob download \
-  --account-name msassignmenttfstate \
+  --account-name msassignmenttfstate1 \
   --container-name tfstate \
   --name acr-demo.terraform.tfstate \
   --file backup-$(date +%Y%m%d).tfstate

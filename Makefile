@@ -25,7 +25,7 @@ init: ## Initialize Terraform
 	@echo "🏗️  Initializing Terraform..."
 	@terraform init \
 		-backend-config="resource_group_name=Storage_SG" \
-		-backend-config="storage_account_name=msassignmenttfstate" \
+		-backend-config="storage_account_name=msassignmenttfstate1" \
 		-backend-config="container_name=tfstate" \
 		-backend-config="key=acr-demo.terraform.tfstate"
 

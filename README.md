@@ -80,7 +80,7 @@ Add the following secrets to your GitHub repository (Settings → Secrets and va
 
 This project uses Azure Blob Storage for remote state management. The backend configuration is in [`backend-config.hcl`](backend-config.hcl):
 
-- **Storage Account**: `msassignmenttfstate`
+- **Storage Account**: `msassignmenttfstate1`
 - **Resource Group**: `Storage_SG`
 - **Container**: `tfstate`
 - **State File**: `acr-demo.terraform.tfstate`
@@ -95,7 +95,7 @@ For local testing and development:
 # Initialize Terraform with remote state
 terraform init \
   -backend-config="resource_group_name=Storage_SG" \
-  -backend-config="storage_account_name=msassignmenttfstate" \
+  -backend-config="storage_account_name=msassignmenttfstate1" \
   -backend-config="container_name=tfstate" \
   -backend-config="key=acr-demo.terraform.tfstate"
 
