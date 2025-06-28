@@ -22,7 +22,7 @@ This guide covers the deployment of Azure Kubernetes Service (AKS) with NGINX In
 - **Service CIDR**: `10.1.0.0/16`
 - **DNS Service IP**: `10.1.0.10`
 
-## Security Features
+## Security Features.
 
 ### Private Cluster Configuration
 
